@@ -1,1 +1,8 @@
+# VSCode temporary files
+.vscode/
+
+# Don't need pipfile.lock's level of detail at the moment
 Pipfile.lock
+
+# No sharing secret passwords...
+credentials.JSON
