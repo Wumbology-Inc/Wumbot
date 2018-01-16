@@ -6,3 +6,6 @@ Pipfile.lock
 
 # No sharing secret passwords...
 credentials.JSON
+
+# Virtual Envs
+.venv/

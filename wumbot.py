@@ -1,4 +1,5 @@
 import json
+import re
 
 import discord
 
@@ -17,6 +18,14 @@ class WumbotClient(discord.Client):
             if message.content == 'kill':
                 print('ELA killed me')
                 await self.close()
+
+        # Check to see if /r/_subreddit (e.g. /r/python) has been typed & add a Reddit embed
+        # Ignores regular reddit links (e.g. http://www.reddit.com/r/Python)
+        testSubreddit = re.search(r'\B\/?r\/(\w+)', message.content)
+        if testSubreddit:
+            SubredditEmbed = buildSubredditEmbed(testSubreddit)
+            await message.channel.send(embed=SubredditEmbed)
+        
 
 def isELA(user):
     """
@@ -39,6 +48,22 @@ def isDM(channel):
         return False
     else:
         return True
+
+def buildSubredditEmbed(matchObj):
+    """
+    Builds a message embed from the input regex match object
+
+    Subreddit string is without /r/
+
+    For now, only utilizes the first match
+    """
+    subreddit = matchObj.group(1)
+
+    embed = discord.Embed(title=f"/r/{subreddit}", color=discord.Color(0x9c4af7), url=f"https://www.reddit.com/r/{subreddit}")
+    embed.set_thumbnail(url="https://b.thumbs.redditmedia.com/5-IE6cGJg-F8IBh3x81hFSJRbfPFDg4FU4Y-RbuNO0Q.png")
+    embed.set_author(name="Reddit")
+
+    return embed
 
 def loadCredentials(sourceJSON):
     """
