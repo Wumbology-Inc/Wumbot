@@ -17,14 +17,20 @@ class WumbotClient(discord.Client):
         if isDM(message.channel) and isELA(message.author):
             if message.content == 'kill':
                 print('ELA killed me')
+                await message.channel.send('Shutting down... :wave:')
                 await self.close()
 
         # Check to see if /r/_subreddit (e.g. /r/python) has been typed & add a Reddit embed
         # Ignores regular reddit links (e.g. http://www.reddit.com/r/Python)
-        testSubreddit = re.search(r'\B\/?r\/(\w+)', message.content)
+        testSubreddit = re.search(r'\B\/?[rR]\/(\w+)', message.content)
         if testSubreddit:
             SubredditEmbed = buildSubredditEmbed(testSubreddit)
             await message.channel.send(embed=SubredditEmbed)
+
+        # Check for "regular" Amazon link, capture full link & ASIN
+        testAmazonASIN = re.search(r'https?.*\/\/.+\.amazon\..+\/([A-Z0-9]{10})\/\S*', message.content, flags=re.IGNORECASE)
+        # Check for shortened Amazon link (https://a.co/*), capture full link
+        testAmazonShort = re.search(r'https?:\/\/a\.co\S*', message.content, flags=re.IGNORECASE)
         
 
 def isELA(user):
@@ -32,10 +38,7 @@ def isELA(user):
     Check to see if the input User's ID matches my ID
     """
     ELAid = 129606635545952258
-    if user.id == ELAid:
-        return True
-    else:
-        return False
+    return user.id == ELAid
 
 
 def isDM(channel):
@@ -44,10 +47,7 @@ def isDM(channel):
 
     A DM is either an instance of DMChannel or GroupChannel
     """
-    if isinstance(channel, discord.TextChannel):
-        return False
-    else:
-        return True
+    return not isinstance(channel, discord.TextChannel)
 
 def buildSubredditEmbed(matchObj):
     """
