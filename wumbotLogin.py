@@ -20,7 +20,7 @@ def randWumbo(wumboJSON=None):
     else:
         return 'The Game of Wumbo'
 
-async def randWumboTimer(sleepseconds=10800, wumboJSON=None):
+async def randWumboTimer(sleepseconds=3600, wumboJSON=None):
     """
     Async sleep timer to automatically update the bot's Now Playing status
     """
