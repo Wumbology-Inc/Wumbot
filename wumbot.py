@@ -1,8 +1,8 @@
+import random
 import json
 import re
 
 import discord
-
 
 class WumbotClient(discord.Client):
     async def on_ready(self):
@@ -40,7 +40,6 @@ def isELA(user):
     ELAid = 129606635545952258
     return user.id == ELAid
 
-
 def isDM(channel):
     """
     Check to see if a channel is a DM
@@ -65,17 +64,30 @@ def buildSubredditEmbed(matchObj):
 
     return embed
 
-def loadCredentials(sourceJSON):
+def randWumbo(wumboJSON=None):
+    """
+    Load list of Wumboisms from input JSON file & return a random string from the list
+
+    If no JSON is input, defaults to 'The Game of Wumbo'
+    """
+    if wumboJSON:
+        with open(wumboJSON, mode='r') as fID:
+            wumbolist = json.load(fID)
+            return random.choice(wumbolist)
+    else:
+        return 'The Game of Wumbo'
+
+def loadCredentials(credentialJSON):
     """
     Load login credentials from the input JSON file
     """
-    with open(sourceJSON, mode='r') as fID:
+    with open(credentialJSON, mode='r') as fID:
         credentials = json.load(fID)
 
     return credentials
 
 credentials = loadCredentials('credentials.JSON')
 if credentials:
-    wumbogame = discord.Game(name='The Game of Wumbo')
+    wumbogame = discord.Game(name=f"{randWumbo('wumbolist.JSON')}")
     client = WumbotClient(game=wumbogame)
     client.run(credentials['TOKEN'])
