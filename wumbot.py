@@ -2,6 +2,8 @@ import re
 
 import discord
 
+# TODO: Add logging
+
 class WumbotClient(discord.Client):
     async def on_ready(self):
         print(f'Logged in as {self.user}')
@@ -25,6 +27,14 @@ class WumbotClient(discord.Client):
             SubredditEmbed = buildSubredditEmbed(testSubreddit)
             await message.channel.send(embed=SubredditEmbed)
 
+        # Check to see if Reddit's stupid image/video hosting has added 'DashPlaylist.mpd'
+        # to the end of the URL, which links to a direct download (of nothing) rather
+        # than the web content
+        testVreddit = re.search(r'(https?:\/\/v.redd.it\/.*)(DASHPlaylist.*$)', message.content)
+        if testVreddit:
+            newURL = testVreddit.group(1)
+            await message.channel.send(f"Here {message.author.name}, let me fix that v.redd.it link for you: {newURL}")
+
         # Check for "regular" Amazon link, capture full link & ASIN
         testAmazonASIN = re.search(r'https?.*\/\/.+\.amazon\..+\/([A-Z0-9]{10})\/\S*', message.content, flags=re.IGNORECASE)
         # Check for shortened Amazon link (https://a.co/*), capture full link
@@ -34,6 +44,8 @@ class WumbotClient(discord.Client):
 def isELA(user):
     """
     Check to see if the input User's ID matches my ID
+
+    Returns a bool
     """
     ELAid = 129606635545952258
     return user.id == ELAid
@@ -43,6 +55,8 @@ def isDM(channel):
     Check to see if a channel is a DM
 
     A DM is either an instance of DMChannel or GroupChannel
+
+    Returns a bool
     """
     return not isinstance(channel, discord.TextChannel)
 
@@ -53,6 +67,8 @@ def buildSubredditEmbed(matchObj):
     Subreddit string is without /r/
 
     For now, only utilizes the first match
+
+    Returns an embed object
     """
     subreddit = matchObj.group(1)
 

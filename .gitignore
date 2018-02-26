@@ -2,11 +2,11 @@
 .vscode/
 __pycache__/
 
-# Don't need pipfile.lock's level of detail at the moment
-Pipfile.lock
-
 # No sharing secret passwords...
 credentials.JSON
 
 # Virtual Envs
 .venv/
+
+# Dev build things
+rundevbot.sh
