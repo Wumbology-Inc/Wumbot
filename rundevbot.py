@@ -1,5 +1,6 @@
 import logging
 import time
+import os
 
 import docker
 
@@ -10,7 +11,7 @@ class UTCFormatter(logging.Formatter):
 
 logformat = '%(asctime)s %(levelname)s:%(module)s:%(message)s'
 dateformat = '%Y-%m-%d %H:%M:%S'
-logging.basicConfig(filename='wumbotdocker.log', filemode='a', level=logging.INFO, 
+logging.basicConfig(filename='./log/wumbotdocker.log', filemode='a', level=logging.INFO, 
                     format=logformat, datefmt=dateformat
                     )
 
@@ -28,13 +29,12 @@ else:
     logging.info(f"Killed {len(wumbotcontainers)} {dockername} containers")
 
 # Build the new image
-# docker build -t wumbot-dev .
 logging.info(f"Building new {dockername} image...")
-buildout = APIClient.build(path='.', tag=dockername)
-logging.info([line for line in buildout])
+img, buildlog = client.images.build(path='.', tag=dockername, rm=True)
+[logging.debug(line) for line in buildlog]
 logging.info(f"{dockername} image build complete")
 
 # Restart the bot container
-# docker run -d --rm --name wumbot-dev wumbot-dev
 logging.info(f"Restarting {dockername}...")
-client.containers.run(dockername, auto_remove=True, detach=True, name=dockername)
+vol = {f'{os.getcwd()}/log': {'bind': '/app/log', 'mode': 'rw'}}
+client.containers.run(img.id, auto_remove=True, detach=True, name=dockername, volumes=vol)
