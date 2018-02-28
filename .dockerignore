@@ -1,0 +1,5 @@
+# Ignore existing logs
+*.log
+
+# Ignore cloned development helpers
+rundevbot.py
