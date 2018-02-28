@@ -1,10 +1,12 @@
 import re
+import logging
 
 import discord
 
 class WumbotClient(discord.Client):
     async def on_ready(self):
-        print(f'Logged in as {self.user}')
+        logging.info(f'Logged in as {self.user}')
+        print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
 
     async def on_message(self, message):
         # Avoid self-replies
@@ -14,7 +16,7 @@ class WumbotClient(discord.Client):
         # Hardcode a 'kill' command in a DM to the bot from me
         if isDM(message.channel) and isELA(message.author):
             if message.content == 'kill':
-                print('ELA killed me')
+                logging.info('Bot session killed by ELA')
                 await message.channel.send('Shutting down... :wave:')
                 await self.close()
 
@@ -22,6 +24,9 @@ class WumbotClient(discord.Client):
         # Ignores regular reddit links (e.g. http://www.reddit.com/r/Python)
         testSubreddit = re.search(r'\B\/?[rR]\/(\w+)', message.content)
         if testSubreddit:
+            logging.debug(f"Subreddit detected: '{testSubreddit.group(1)}'")
+            logging.debug(f"Message author: {message.author}")
+            logging.debug(f"Original message: '{message.content}'")
             SubredditEmbed = buildSubredditEmbed(testSubreddit)
             await message.channel.send(embed=SubredditEmbed)
 
