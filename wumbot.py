@@ -29,6 +29,16 @@ class WumbotClient(discord.Client):
             logging.debug(f"Original message: '{message.content}'")
             SubredditEmbed = buildSubredditEmbed(testSubreddit)
             await message.channel.send(embed=SubredditEmbed)
+  
+        # Check to see if Reddit's stupid image/video hosting has added 'DashPlaylist.mpd'
+        # to the end of the URL, which links to a direct download (of nothing) rather
+        # than the web content
+        testVreddit = re.search(r'(https?:\/\/v.redd.it\/.*)(DASHPlaylist.*$)', message.content)
+        if testVreddit:
+            newURL = testVreddit.group(1)
+            logging.debug(f"VReddit MPD detected: '{testVreddit.group(0)}'")
+            logging.debug(f"Link converted to: {newURL}")
+            await message.channel.send(f"Here {message.author.name}, let me fix that v.redd.it link for you: {newURL}")
 
         # Check for "regular" Amazon link, capture full link & ASIN
         testAmazonASIN = re.search(r'https?.*\/\/.+\.amazon\..+\/([A-Z0-9]{10})\/\S*', message.content, flags=re.IGNORECASE)
