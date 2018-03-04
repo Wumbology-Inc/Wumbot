@@ -1,10 +1,10 @@
 FROM python:3.6
 
 RUN set -ex && mkdir /app
-WORKDIR /app
 
+WORKDIR /app
 ADD . /app
-COPY credentials.JSON credentials.JSON
 RUN set -ex && pip install -r requirements.txt
 
+COPY credentials.JSON credentials.JSON
 CMD ["python", "wumbotLogin.py"]

@@ -1,9 +1,22 @@
 import asyncio
+import logging
 import random
 import json
+import time
 
 from wumbot import WumbotClient
 from discord import Game
+
+# Force UTC Timestamps
+# From the logging cookbook: https://docs.python.org/3/howto/logging-cookbook.html
+class UTCFormatter(logging.Formatter):
+    converter = time.gmtime
+
+logformat = '%(asctime)s %(levelname)s:%(module)s:%(message)s'
+dateformat = '%Y-%m-%d %H:%M:%S'
+logging.basicConfig(filename='./log/wumbot.log', filemode='a', level=logging.INFO, 
+                    format=logformat, datefmt=dateformat
+                    )
 
 client = WumbotClient()
 
@@ -28,6 +41,7 @@ async def randWumboTimer(sleepseconds=3600, wumboJSON=None):
     while not client.is_closed():
         wumbogame = Game(name=f"{randWumbo(wumboJSON)}")
 
+        logging.debug(f"Changing game to: '{wumbogame.name}'")
         await client.change_presence(game=wumbogame)
         await asyncio.sleep(sleepseconds)
 
@@ -40,7 +54,10 @@ def loadCredentials(credentialJSON):
 
     return credentials
 
-credentials = loadCredentials('credentials.JSON')
+credentialpath = './credentials.JSON'
+credentials = loadCredentials(credentialpath)
 if credentials:
     client.loop.create_task(randWumboTimer(wumboJSON='wumbolist.JSON'))
     client.run(credentials['TOKEN'])
+else:
+    logging.info(f"Credential file empty: {credentialpath}")

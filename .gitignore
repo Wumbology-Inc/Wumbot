@@ -1,12 +1,12 @@
+# No sharing secret passwords...
+credentials.JSON
+
 # Caches
 .vscode/
 __pycache__/
 
-# No sharing secret passwords...
-credentials.JSON
-
 # Virtual Envs
 .venv/
 
-# Dev build things
-rundevbot.sh
+# Logs
+*.log

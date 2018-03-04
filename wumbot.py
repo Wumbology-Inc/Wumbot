@@ -1,4 +1,5 @@
 import re
+import logging
 
 import discord
 
@@ -6,7 +7,8 @@ import discord
 
 class WumbotClient(discord.Client):
     async def on_ready(self):
-        print(f'Logged in as {self.user}')
+        logging.info(f'Logged in as {self.user}')
+        print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
 
     async def on_message(self, message):
         # Avoid self-replies
@@ -16,16 +18,29 @@ class WumbotClient(discord.Client):
         # Hardcode a 'kill' command in a DM to the bot from me
         if isDM(message.channel) and isELA(message.author):
             if message.content == 'kill':
-                print('ELA killed me')
+                logging.info('Bot session killed by ELA')
                 await message.channel.send('Shutting down... :wave:')
                 await self.close()
 
         # Check to see if /r/_subreddit (e.g. /r/python) has been typed & add a Reddit embed
         # Ignores regular reddit links (e.g. http://www.reddit.com/r/Python)
-        testSubreddit = re.search(r'\B\/?[rR]\/(\w+)', message.content)
+        testSubreddit = re.search(r'(?<=\s)\/?[rR]\/(\w+)', message.content)
         if testSubreddit:
+            logging.debug(f"Subreddit detected: '{testSubreddit.group(1)}'")
+            logging.debug(f"Message author: {message.author}")
+            logging.debug(f"Original message: '{message.content}'")
             SubredditEmbed = buildSubredditEmbed(testSubreddit)
             await message.channel.send(embed=SubredditEmbed)
+  
+        # Check to see if Reddit's stupid image/video hosting has added 'DashPlaylist.mpd'
+        # to the end of the URL, which links to a direct download (of nothing) rather
+        # than the web content
+        testVreddit = re.search(r'(https?:\/\/v.redd.it\/.*)(DASHPlaylist.*$)', message.content)
+        if testVreddit:
+            newURL = testVreddit.group(1)
+            logging.debug(f"VReddit MPD detected: '{testVreddit.group(0)}'")
+            logging.debug(f"Link converted to: {newURL}")
+            await message.channel.send(f"Here {message.author.name}, let me fix that v.redd.it link for you: {newURL}")
 
         # Check to see if Reddit's stupid image/video hosting has added 'DashPlaylist.mpd'
         # to the end of the URL, which links to a direct download (of nothing) rather
