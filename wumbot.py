@@ -22,7 +22,7 @@ class WumbotClient(discord.Client):
 
         # Check to see if /r/_subreddit (e.g. /r/python) has been typed & add a Reddit embed
         # Ignores regular reddit links (e.g. http://www.reddit.com/r/Python)
-        testSubreddit = re.search(r'\B\/?[rR]\/(\w+)', message.content)
+        testSubreddit = re.search(r'(?<=\s)\/?[rR]\/(\w+)', message.content)
         if testSubreddit:
             logging.debug(f"Subreddit detected: '{testSubreddit.group(1)}'")
             logging.debug(f"Message author: {message.author}")
