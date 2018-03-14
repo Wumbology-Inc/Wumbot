@@ -18,13 +18,14 @@ logging.basicConfig(filename='./log/wumbotdocker.log', filemode='a', level=loggi
 client = docker.from_env()
 APIClient = docker.APIClient()
 
-# Find & kill any existing containers
-dockername = 'wumbot-dev'
+# Find & kill any existing containers that haven't been stopped/cleaned up
+dockername = 'wumbot'
 containerfilter = {'name':dockername}
 wumbotcontainers = APIClient.containers(filters=containerfilter)
 logging.info(f"Found {len(wumbotcontainers)} running {dockername} containers")
 for container in wumbotcontainers:
     APIClient.stop(container['Id'])
+    APIClient.remove_container(container['Id'])
 else:
     logging.info(f"Killed {len(wumbotcontainers)} {dockername} containers")
 
