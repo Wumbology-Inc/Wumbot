@@ -42,7 +42,7 @@ async def randWumboTimer(sleepseconds=3600, wumboJSON=None):
         wumbogame = Game(name=f"{randWumbo(wumboJSON)}")
 
         logging.debug(f"Changing game to: '{wumbogame.name}'")
-        await client.change_presence(game=wumbogame)
+        await client.change_presence(activity=wumbogame)
         await asyncio.sleep(sleepseconds)
 
 def loadCredentials(credentialJSON):
