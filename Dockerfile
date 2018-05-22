@@ -1,4 +1,6 @@
 FROM python:3.6-alpine
+# Add git
+RUN apk update && apk upgrade && apk add --no-cache git
 
 RUN set -ex && mkdir /app
 
