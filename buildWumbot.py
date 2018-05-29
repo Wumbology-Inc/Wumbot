@@ -25,9 +25,8 @@ wumbotcontainers = APIClient.containers(filters=containerfilter)
 logging.info(f"Found {len(wumbotcontainers)} running {dockername} containers")
 for container in wumbotcontainers:
     APIClient.stop(container['Id'])
-    APIClient.remove_container(container['Id'])
 else:
-    logging.info(f"Killed {len(wumbotcontainers)} {dockername} containers")
+    logging.info(f"Stopped {len(wumbotcontainers)} {dockername} containers")
 
 # Build the new image
 logging.info(f"Building new {dockername} image...")
