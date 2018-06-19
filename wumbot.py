@@ -1,16 +1,20 @@
-import re
 import logging
+import re
+from datetime import datetime
 
-import git
 import discord
+import git
 from discord.ext import commands
+
 
 class WumbotClient(commands.Bot):
     def __init__(self, *args, **kwargs):
         super(WumbotClient, self).__init__(*args, **kwargs)
-        self.add_command(ver)
+        self.add_command(self.ver)
+        self.add_command(self.uptime)
 
     async def on_ready(self):
+        self.launch_time = datetime.now()
         logging.info(f'Logged in as {self.user}')
         print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
 
@@ -54,14 +58,24 @@ class WumbotClient(commands.Bot):
         # Check for shortened Amazon link (https://a.co/*), capture full link
         testAmazonShort = re.search(r'https?:\/\/a\.co\S*', message.content, flags=re.IGNORECASE)
 
-@commands.command()
-async def ver(ctx):
-    currRepo = git.Repo('.')
-    repoGit = currRepo.git
-    try:
-        await ctx.message.channel.send(f'Current Version: {repoGit.describe()}')
-    except git.GitCommandError as err:
-        await ctx.message.channel.send('No tags found on current branch')
+    @commands.command()
+    async def ver(self, ctx):
+        logging.debug('ver command entered')
+        currRepo = git.Repo('.')
+        repoGit = currRepo.git
+        try:
+            await ctx.message.channel.send(f'Current Version: {repoGit.describe()}')
+        except git.GitCommandError as err:
+            await ctx.send('No tags found on current branch')
+
+    @commands.command()
+    async def uptime(self, ctx):
+        logging.debug('uptime command entered')
+        delta_uptime = datetime.utcnow() - self.launch_time
+        hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        days, hours = divmod(hours, 24)
+        await ctx.send(f"Wumbot has been up for: {days}d {hours}h {minutes}m {seconds}s")
 
 def isELA(user):
     """
