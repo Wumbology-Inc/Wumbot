@@ -1,8 +1,9 @@
 import logging
-import time
 import os
+import time
 
 import docker
+
 
 # Force UTC Timestamps
 # From the logging cookbook: https://docs.python.org/3/howto/logging-cookbook.html

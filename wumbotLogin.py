@@ -1,11 +1,13 @@
 import asyncio
+import json
 import logging
 import random
-import json
 import time
 
 from discord import Game
+
 from wumbot import WumbotClient
+
 
 # Force UTC Timestamps
 # From the logging cookbook: https://docs.python.org/3/howto/logging-cookbook.html
