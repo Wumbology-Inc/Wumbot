@@ -24,8 +24,10 @@ class WumbotClient(commands.Bot):
         if message.author.id == self.user.id:
             return
 
+        # Short circuit the rest of the parsing if a command is passed
         if message.content.startswith(self.command_prefix):
             await self.process_commands(message)
+            return
 
         # Check to see if /r/_subreddit (e.g. /r/python) has been typed & add a Reddit embed
         # Ignores regular reddit links (e.g. http://www.reddit.com/r/Python)
@@ -54,6 +56,9 @@ class WumbotClient(commands.Bot):
 
     @commands.command()
     async def ver(self, ctx):
+        """
+        Reply with current Wumbot version number from the git master branch tag
+        """
         logging.debug('ver command entered')
         currRepo = git.Repo('.')
         repoGit = currRepo.git
@@ -64,6 +69,9 @@ class WumbotClient(commands.Bot):
 
     @commands.command()
     async def uptime(self, ctx):
+        """
+        Reply with current uptime
+        """
         logging.debug('uptime command entered')
         delta_uptime = datetime.utcnow() - self.launch_time
         hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
@@ -73,17 +81,24 @@ class WumbotClient(commands.Bot):
 
     @commands.command()
     async def kill(self, ctx):
-        if isDM(ctx.message.channel) and isELA(ctx.message.author):
-            logging.info('Bot session killed by ELA')
+        """
+        Disconnect bot from Discord
+
+        Only valid if bot owner invokes the command in a DM
+        """
+        if isDM(ctx.message.channel) and isOwner(ctx.message.author):
+            logging.info('Bot session killed by Owner')
             await ctx.send('Shutting down... :wave:')
             await self.close()
+        else:
+            await ctx.send('You are not authorized to perform this operation')
 
-def isELA(user):
+def isOwner(user):
     """
-    Check to see if the input User's ID matches my ID
+    Check to see if the input User's ID matches the Owner ID
     """
-    ELAid = 129606635545952258
-    return user.id == ELAid
+    ownerID = 129606635545952258
+    return user.id == ownerID
 
 def isDM(channel):
     """
@@ -95,7 +110,7 @@ def isDM(channel):
 
 def buildSubredditEmbed(matchObj):
     """
-    Builds a message embed from the input regex match object
+    Build a message embed from the input regex match object
 
     Subreddit string is without /r/
 
