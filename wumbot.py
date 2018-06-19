@@ -12,9 +12,10 @@ class WumbotClient(commands.Bot):
         super(WumbotClient, self).__init__(*args, **kwargs)
         self.add_command(self.ver)
         self.add_command(self.uptime)
+        self.add_command(self.kill)
 
     async def on_ready(self):
-        self.launch_time = datetime.now()
+        self.launch_time = datetime.utcnow()
         logging.info(f'Logged in as {self.user}')
         print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
 
@@ -22,13 +23,6 @@ class WumbotClient(commands.Bot):
         # Avoid self-replies
         if message.author.id == self.user.id:
             return
-
-        # Hardcode a 'kill' command in a DM to the bot from me
-        if isDM(message.channel) and isELA(message.author):
-            if message.content == 'kill':
-                logging.info('Bot session killed by ELA')
-                await message.channel.send('Shutting down... :wave:')
-                await self.close()
 
         if message.content.startswith(self.command_prefix):
             await self.process_commands(message)
@@ -76,6 +70,13 @@ class WumbotClient(commands.Bot):
         minutes, seconds = divmod(remainder, 60)
         days, hours = divmod(hours, 24)
         await ctx.send(f"Wumbot has been up for: {days}d {hours}h {minutes}m {seconds}s")
+
+    @commands.command()
+    async def kill(self, ctx):
+        if isDM(ctx.message.channel) and isELA(ctx.message.author):
+            logging.info('Bot session killed by ELA')
+            await ctx.send('Shutting down... :wave:')
+            await self.close()
 
 def isELA(user):
     """
