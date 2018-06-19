@@ -4,8 +4,8 @@ import random
 import json
 import time
 
-from wumbot import WumbotClient
 from discord import Game
+from wumbot import WumbotClient
 
 # Force UTC Timestamps
 # From the logging cookbook: https://docs.python.org/3/howto/logging-cookbook.html
@@ -18,7 +18,7 @@ logging.basicConfig(filename='./log/wumbot.log', filemode='a', level=logging.INF
                     format=logformat, datefmt=dateformat
                     )
 
-client = WumbotClient()
+client = WumbotClient(command_prefix='~')
 
 def randWumbo(wumboJSON=None):
     """

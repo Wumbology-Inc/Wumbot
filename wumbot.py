@@ -1,9 +1,15 @@
 import re
 import logging
 
+import git
 import discord
+from discord.ext import commands
 
-class WumbotClient(discord.Client):
+class WumbotClient(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super(WumbotClient, self).__init__(*args, **kwargs)
+        self.add_command(ver)
+
     async def on_ready(self):
         logging.info(f'Logged in as {self.user}')
         print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
@@ -19,6 +25,9 @@ class WumbotClient(discord.Client):
                 logging.info('Bot session killed by ELA')
                 await message.channel.send('Shutting down... :wave:')
                 await self.close()
+
+        if message.content.startswith(self.command_prefix):
+            await self.process_commands(message)
 
         # Check to see if /r/_subreddit (e.g. /r/python) has been typed & add a Reddit embed
         # Ignores regular reddit links (e.g. http://www.reddit.com/r/Python)
@@ -44,7 +53,15 @@ class WumbotClient(discord.Client):
         testAmazonASIN = re.search(r'https?.*\/\/.+\.amazon\..+\/([A-Z0-9]{10})\/\S*', message.content, flags=re.IGNORECASE)
         # Check for shortened Amazon link (https://a.co/*), capture full link
         testAmazonShort = re.search(r'https?:\/\/a\.co\S*', message.content, flags=re.IGNORECASE)
-        
+
+@commands.command()
+async def ver(ctx):
+    currRepo = git.Repo('.')
+    repoGit = currRepo.git
+    try:
+        await ctx.message.channel.send(f'Current Version: {repoGit.describe()}')
+    except git.GitCommandError as err:
+        await ctx.message.channel.send('No tags found on current branch')
 
 def isELA(user):
     """
