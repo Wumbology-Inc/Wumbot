@@ -31,11 +31,10 @@ class WumbotClient(commands.Bot):
 
         # Check to see if /r/_subreddit (e.g. /r/python) has been typed & add a Reddit embed
         # Ignores regular reddit links (e.g. http://www.reddit.com/r/Python)
-        testSubreddit = re.search(r'(?:^|\s)\/?[rR]\/(\w+)', message.content)
+        testSubreddit = re.findall(r'(?:^|\s)\/?[rR]\/(\w+)', message.content)
         if testSubreddit:
-            logging.debug(f"Subreddit detected: '{testSubreddit.group(1)}'")
-            logging.debug(f"Message author: {message.author}")
-            logging.debug(f"Original message: '{message.content}'")
+            logging.info(f"Subreddit(s) detected: '{testSubreddit}'")
+            logging.info(f"Original message: '{message.content}'")
             SubredditEmbed = buildSubredditEmbed(testSubreddit)
             await message.channel.send(embed=SubredditEmbed)
   
@@ -45,8 +44,8 @@ class WumbotClient(commands.Bot):
         testVreddit = re.search(r'(https?:\/\/v.redd.it\/.*)(DASHPlaylist.*$)', message.content)
         if testVreddit:
             newURL = testVreddit.group(1)
-            logging.debug(f"VReddit MPD detected: '{testVreddit.group(0)}'")
-            logging.debug(f"Link converted to: {newURL}")
+            logging.info(f"VReddit MPD detected: '{testVreddit.group(0)}'")
+            logging.info(f"Link converted to: {newURL}")
             await message.channel.send(f"Here {message.author.name}, let me fix that v.redd.it link for you: {newURL}")
 
         # Check for "regular" Amazon link, capture full link & ASIN
@@ -59,7 +58,6 @@ class WumbotClient(commands.Bot):
         """
         Reply with current Wumbot version number from the git master branch tag
         """
-        logging.debug('ver command entered')
         currRepo = git.Repo('.')
         repoGit = currRepo.git
         try:
@@ -72,7 +70,6 @@ class WumbotClient(commands.Bot):
         """
         Reply with current uptime
         """
-        logging.debug('uptime command entered')
         delta_uptime = datetime.utcnow() - self.launch_time
         hours, remainder = divmod(int(delta_uptime.total_seconds()), 3600)
         minutes, seconds = divmod(remainder, 60)
@@ -111,18 +108,29 @@ def isDM(channel):
     """
     return not isinstance(channel, discord.TextChannel)
 
-def buildSubredditEmbed(matchObj):
+def buildSubredditEmbed(subredditlist, embedlimit=3):
     """
-    Build a message embed from the input regex match object
+    Build a message embed from a list of subreddit strings (sans '/r/')
 
-    Subreddit string is without /r/
-
-    For now, only utilizes the first match
+    Limit to embedlimit number of subreddits per embed, for brevity. Default is 3
     """
-    subreddit = matchObj.group(1)
+    snooURL = "https://images-eu.ssl-images-amazon.com/images/I/418PuxYS63L.png"
 
-    embed = discord.Embed(title=f"/r/{subreddit}", color=discord.Color(0x9c4af7), url=f"https://www.reddit.com/r/{subreddit}")
-    embed.set_thumbnail(url="https://b.thumbs.redditmedia.com/5-IE6cGJg-F8IBh3x81hFSJRbfPFDg4FU4Y-RbuNO0Q.png")
-    embed.set_author(name="Reddit")
+    embed = discord.Embed(color=discord.Color(0x9c4af7))
+    embed.set_thumbnail(url=snooURL)
+    embed.set_author(name='Subreddit Embedder 9000')
+    embed.set_footer(text='Reddit', icon_url=snooURL)
+
+    if len(subredditlist) == 1:
+        embed.description = "Subreddit detected!"
+        subreddit = subredditlist[0]
+        embed.add_field(name=f"/r/{subreddit}", value=f"https://www.reddit.com/r/{subreddit}", inline=False)
+    else:
+        embed.description = "Subreddits detected!"
+        for subreddit in subredditlist[0:fieldlimit]:
+            embed.add_field(name=f"/r/{subreddit}", value=f"https://www.reddit.com/r/{subreddit}", inline=False)
+        
+        if len(subredditlist) > embedlimit:
+            embed.add_field(name="Note:", value=f"For brevity, only {embedlimit} subreddits have been embedded. You linked {len(subredditlist)}")
 
     return embed
