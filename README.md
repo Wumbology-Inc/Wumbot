@@ -51,9 +51,8 @@ Example:
 Wumbot parses all incoming messages for specific patterns. Commands utilizing the command prefix (`~`) short circuit and are not parsed.
 
 ### Subreddit Detection & Embed
-When a message is sent containing a subreddit (e.g. "`/r/Python` is the best subreddit!"), Wumbot will generate and respond with a `discord.Embed` object that links to the subreddit.
+When a message is sent containing one or more subreddits (e.g. "`/r/Python` is the best subreddit!"), Wumbot will generate and respond with a `discord.Embed` object that links to the subreddit(s).
 
-**NOTE:** Only the first subreddit in the message is utilized when generating the `discord.Embed` object.
 
 ### v.Reddit `DashPlaylist.mpd` Detection
 Check to see if Reddit's image/video hosting has added `DashPlaylist.mpd` to the end of the URL, which links to a direct download (of nothing) rather than the web content. Wumbot will strip `DashPlaylist.mpd` and respond with the corrected link.
