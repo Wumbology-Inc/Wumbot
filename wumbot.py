@@ -90,8 +90,11 @@ class WumbotClient(commands.Bot):
             logging.info('Bot session killed by Owner')
             await ctx.send('Shutting down... :wave:')
             await self.close()
+        if isOwner(ctx.message.author) and not isDM(ctx.message.channel):
+            await ctx.send(f'{ctx.message.author}, this command only works in a DM')
         else:
-            await ctx.send('You are not authorized to perform this operation')
+            logging.info(f'Unauthorized kill attempt by {ctx.message.author}')
+            await ctx.send(f'{ctx.message.author}, you are not authorized to perform this operation')
 
 def isOwner(user):
     """
