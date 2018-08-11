@@ -6,7 +6,7 @@ credentials.JSON
 __pycache__/
 
 # Virtual Envs
-.venv/
+.*env/
 
 # Logs
 *.log
