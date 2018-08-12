@@ -1,5 +1,6 @@
 # No sharing secret passwords...
 credentials.JSON
+.env
 
 # Caches
 .vscode/

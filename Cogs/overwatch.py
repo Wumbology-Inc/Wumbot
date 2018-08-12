@@ -1,4 +1,3 @@
-import json
 import typing
 from datetime import datetime
 from pathlib import Path
@@ -31,14 +30,13 @@ class PatchParser:
 
         return patchposts
 
-    def loadposted(self, filepath: Path=None):
+    async def loadposted(self, filepath: Path=None):
+        # TODO: Link to Postgres DB
         filepath = filepath if filepath is not None else self.localpostedgifJSON
-        with filepath.open(mode='r') as fID:
-                posted = json.load(fID)
-        
-        return posted
+        raise NotImplementedError
 
-    def saveposted(self, filepath: Path=None):
+    async def saveposted(self, filepath: Path=None):
+        # TODO: Link to Postgres DB
         filepath = filepath if filepath is not None else self.localpostedgifJSON
         raise NotImplementedError
         
