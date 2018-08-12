@@ -3,20 +3,17 @@ import re
 from datetime import datetime
 
 import discord
-import git
 from discord.ext import commands
 
 
 class WumbotClient(commands.Bot):
     def __init__(self, *args, **kwargs):
         super(WumbotClient, self).__init__(*args, **kwargs)
-        self.add_command(self.ver)
-        self.add_command(self.uptime)
-        self.add_command(self.kill)
 
     async def on_ready(self):
         self.launch_time = datetime.utcnow()
         logging.info(f'Logged in as {self.user}')
+<<<<<<< HEAD
         print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
 
     async def on_message(self, message):
@@ -144,3 +141,6 @@ def buildSubredditEmbed(subredditlist, embedlimit=3):
             embed.add_field(name="Note:", value=f"For brevity, only {embedlimit} subreddits have been embedded. You linked {len(subredditlist)}")
 
     return embed
+=======
+        print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
+>>>>>>> develop
