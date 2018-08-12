@@ -7,14 +7,24 @@ import aiohttp
 
 class PatchParser:
     async def getpatchgifs(self, jsonURL: str="https://www.reddit.com/user/itsjieyang/submitted.json"):
+        """
+        Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
+        """
         async with aiohttp.ClientSession() as session:
             async with session.get(jsonURL) as resp:
                 rawdict = await resp.json()
                 submissions = rawdict['data']['children']
 
+        patchposts = []
         for postjson in submissions:
             postobj = RedditPost(postjson)
 
+            # So far, patch notes GIFs we want are from /r/Overwatch and start with "patch"
+            if postobj.subreddit == 'Overwatch' and postobj.title.lower().startswith('patch'):
+                patchposts.append(postobj)
+
+        return patchposts
+        
 class RedditPost:
     def __init__(self, inJSON:typing.Dict):
         # Submission type prefixes, per Reddit's API: https://www.reddit.com/dev/api/
@@ -31,4 +41,7 @@ class RedditPost:
         self.title = inJSON['data']['title']
         self.createdUTC = datetime.utcfromtimestamp(inJSON['data']['created_utc'])
         self.contentURL = inJSON['data']['url']
-        self.permalink = inJSON['data']['permalink']
+        self.permalink = f"https://www.reddit.com{inJSON['data']['permalink']}"
+        
+    def __repr__(self):
+        return f"{self.title}: {self.permalink}"
