@@ -59,7 +59,14 @@ def loadCredentials(credentialJSON):
 credentialpath = './credentials.JSON'
 credentials = loadCredentials(credentialpath)
 if credentials:
+    # Load cogs
+    client.load_extension("cogs.overwatch")
+    client.load_extension("cogs.bot")
+
+    # Setup event loops
     client.loop.create_task(randWumboTimer(wumboJSON='wumbolist.JSON'))
+
     client.run(credentials['TOKEN'])
 else:
     logging.info(f"Credential file empty: {credentialpath}")
+    raise EnvironmentError
