@@ -43,11 +43,6 @@ class Reddit():
         if message.author.id == self.bot.user.id:
             return
 
-        # Short circuit the rest of the parsing if a command is passed
-        if message.content.startswith(self.bot.command_prefix):
-            await self.bot.process_commands(message)
-            return
-
         # Check to see if /r/_subreddit (e.g. /r/python) has been typed & add a Reddit embed
         # Ignores regular reddit links (e.g. http://www.reddit.com/r/Python)
         testSubreddit = re.findall(r'(?:^|\s)\/?[rR]\/(\w+)', message.content)
