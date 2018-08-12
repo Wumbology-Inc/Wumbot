@@ -11,7 +11,7 @@ class MainCommands():
         self.bot = bot
 
     @commands.command()
-    async def ver(self, ctx):
+    async def ver(self, ctx: commands.Context):
         """
         Reply with current Wumbot version number from the git master branch tag
         """
@@ -23,7 +23,7 @@ class MainCommands():
             await ctx.send('No tags found on current branch')
 
     @commands.command()
-    async def uptime(self, ctx):
+    async def uptime(self, ctx: commands.Context):
         """
         Reply with current uptime
         """
@@ -34,7 +34,7 @@ class MainCommands():
         await ctx.send(f"Wumbot has been up for: {days}d {hours}h {minutes}m {seconds}s")
 
     @commands.command()
-    async def kill(self, ctx):
+    async def kill(self, ctx: commands.Context):
         """
         Disconnect bot from Discord
 
@@ -51,7 +51,7 @@ class MainCommands():
             await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
 
     @staticmethod
-    def isOwner(user):
+    def isOwner(user: discord.User):
         """
         Check to see if the input User's ID matches the Owner ID
         """
@@ -59,7 +59,7 @@ class MainCommands():
         return user.id == ownerID
     
     @staticmethod
-    def isDM(channel):
+    def isDM(channel: discord.TextChannel):
         """
         Check to see if a channel is a DM
 

@@ -45,7 +45,7 @@ class Reddit():
 
         # Short circuit the rest of the parsing if a command is passed
         if message.content.startswith(self.bot.command_prefix):
-            await self.process_commands(message)
+            await self.bot.process_commands(message)
             return
 
         # Check to see if /r/_subreddit (e.g. /r/python) has been typed & add a Reddit embed
