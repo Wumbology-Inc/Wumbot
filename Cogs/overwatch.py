@@ -3,43 +3,9 @@ from datetime import datetime
 from pathlib import Path
 
 import aiohttp
+import discord
 
 
-class PatchParser:
-    def __init__(self):
-        self.postjsonURL = "https://www.reddit.com/user/itsjieyang/submitted.json"
-        self.localpostedgifJSON = Path('./postedOWpatchgifs')
-
-    async def getpatchgifs(self, jsonURL: str=None):
-        """
-        Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
-        """
-        jsonURL = jsonURL if jsonURL is not None else self.postjsonURL
-        async with aiohttp.ClientSession() as session:
-            async with session.get(jsonURL) as resp:
-                rawdict = await resp.json()
-                submissions = rawdict['data']['children']
-
-        patchposts = []
-        for postjson in submissions:
-            postobj = RedditPost(postjson)
-
-            # So far, patch notes GIFs we want are from /r/Overwatch and start with "patch"
-            if postobj.subreddit == 'Overwatch' and postobj.title.lower().startswith('patch'):
-                patchposts.append(postobj)
-
-        return patchposts
-
-    async def loadposted(self, filepath: Path=None):
-        # TODO: Link to Postgres DB
-        filepath = filepath if filepath is not None else self.localpostedgifJSON
-        raise NotImplementedError
-
-    async def saveposted(self, filepath: Path=None):
-        # TODO: Link to Postgres DB
-        filepath = filepath if filepath is not None else self.localpostedgifJSON
-        raise NotImplementedError
-        
 class RedditPost:
     def __init__(self, inJSON:typing.Dict):
         # Submission type prefixes, per Reddit's API: https://www.reddit.com/dev/api/
@@ -60,3 +26,51 @@ class RedditPost:
         
     def __repr__(self):
         return f"{self.title}: {self.permalink}"
+
+class PatchParser:
+    def __init__(self, bot):
+        self.bot = bot
+        self.postjsonURL = "https://www.reddit.com/user/itsjieyang/submitted.json"
+        self.postchannelID = 477916849879908386
+
+    async def getpatchgifs(self, jsonURL: str=None):
+        """
+        Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
+        """
+        jsonURL = jsonURL if jsonURL is not None else self.postjsonURL
+        async with aiohttp.ClientSession() as session:
+            async with session.get(jsonURL) as resp:
+                rawdict = await resp.json()
+                submissions = rawdict['data']['children']
+
+        patchposts = []
+        for postjson in submissions:
+            postobj = RedditPost(postjson)
+
+            # So far, patch notes GIFs we want are from /r/Overwatch and start with "patch"
+            if postobj.subreddit == 'Overwatch' and postobj.title.lower().startswith('patch'):
+                patchposts.append(postobj)
+
+        print(patchposts)
+
+        return patchposts
+
+    async def postpatchgif(self, channelID: int=None, postobj: RedditPost=None):
+        channelID = channelID if channelID is not None else self.postchannelID
+
+        if postobj is None or not isinstance(postobj, RedditPost):
+            raise ValueError
+
+        raise NotImplementedError
+
+    async def loadposted(self):
+        # TODO: Link to Postgres DB
+        raise NotImplementedError
+
+    async def saveposted(self):
+        # TODO: Link to Postgres DB
+        raise NotImplementedError
+
+
+def setup(bot):
+    bot.add_cog(PatchParser(bot))
