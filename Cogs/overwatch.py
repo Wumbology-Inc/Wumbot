@@ -1,15 +1,21 @@
 import json
 import typing
 from datetime import datetime
+from pathlib import Path
 
 import aiohttp
 
 
 class PatchParser:
-    async def getpatchgifs(self, jsonURL: str="https://www.reddit.com/user/itsjieyang/submitted.json"):
+    def __init__(self):
+        self.postjsonURL = "https://www.reddit.com/user/itsjieyang/submitted.json"
+        self.localpostedgifJSON = Path('./postedOWpatchgifs')
+
+    async def getpatchgifs(self, jsonURL: str=None):
         """
         Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
         """
+        jsonURL = jsonURL if jsonURL is not None else self.postjsonURL
         async with aiohttp.ClientSession() as session:
             async with session.get(jsonURL) as resp:
                 rawdict = await resp.json()
@@ -24,6 +30,17 @@ class PatchParser:
                 patchposts.append(postobj)
 
         return patchposts
+
+    def loadposted(self, filepath: Path=None):
+        filepath = filepath if filepath is not None else self.localpostedgifJSON
+        with filepath.open(mode='r') as fID:
+                posted = json.load(fID)
+        
+        return posted
+
+    def saveposted(self, filepath: Path=None):
+        filepath = filepath if filepath is not None else self.localpostedgifJSON
+        raise NotImplementedError
         
 class RedditPost:
     def __init__(self, inJSON:typing.Dict):
