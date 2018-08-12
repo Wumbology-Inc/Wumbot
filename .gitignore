@@ -8,5 +8,8 @@ __pycache__/
 # Virtual Envs
 .*env/
 
+# Jupyter
+*.ipynb
+
 # Logs
 *.log
