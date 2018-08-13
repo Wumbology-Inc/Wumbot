@@ -1,9 +1,11 @@
 import json
 import logging
 import time
+from datetime import datetime
+
+from discord.ext import commands
 
 from services import overwatch, wumbopresence
-from wumbot import WumbotClient
 
 
 # Force UTC Timestamps
@@ -16,8 +18,14 @@ dateformat = '%Y-%m-%d %H:%M:%S'
 logging.basicConfig(filename='./log/wumbot.log', filemode='a', level=logging.INFO, 
                     format=logformat, datefmt=dateformat
                     )
+class WumbotClient(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super(WumbotClient, self).__init__(*args, **kwargs)
 
-client = WumbotClient(command_prefix='~')
+    async def on_ready(self):
+        self.launch_time = datetime.utcnow()
+        logging.info(f'Logged in as {self.user}')
+        print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
 
 def loadCredentials(credentialJSON):
     """
@@ -28,6 +36,7 @@ def loadCredentials(credentialJSON):
 
     return credentials
 
+client = WumbotClient(command_prefix='~')
 credentialpath = './credentials.JSON'
 credentials = loadCredentials(credentialpath)
 if credentials:
