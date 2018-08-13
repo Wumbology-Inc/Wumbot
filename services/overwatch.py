@@ -71,6 +71,17 @@ class PatchParser:
         # TODO: Link to Postgres DB
         raise NotImplementedError
 
+    async def patchcheckloop(self, sleepseconds=3600):
+        """
+        Async sleep timer to automatically update the bot's Now Playing status
+        """
+        await self.bot.wait_until_ready()
+        while not self.bot.is_closed():
+            test = await self.getpatchgifs()
+            print(test)
+
+            await asyncio.sleep(sleepseconds)
+
 
 def setup(bot):
     bot.add_cog(PatchParser(bot))

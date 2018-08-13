@@ -6,6 +6,7 @@ import time
 
 from discord import Game
 
+from services import overwatch
 from wumbot import WumbotClient
 
 
@@ -60,12 +61,14 @@ credentialpath = './credentials.JSON'
 credentials = loadCredentials(credentialpath)
 if credentials:
     # Load cogs
-    client.load_extension("cogs.overwatch")
     client.load_extension("cogs.bot")
     client.load_extension("cogs.reddit")
 
     # Setup event loops
     client.loop.create_task(randWumboTimer(wumboJSON='wumbolist.JSON'))
+    
+    p = overwatch.PatchParser(client)
+    client.loop.create_task(p.patchcheckloop())
 
     client.run(credentials['TOKEN'])
 else:
