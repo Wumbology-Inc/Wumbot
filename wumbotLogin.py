@@ -1,12 +1,8 @@
-import asyncio
 import json
 import logging
-import random
 import time
 
-from discord import Game
-
-from services import overwatch
+from services import overwatch, wumbopresence
 from wumbot import WumbotClient
 
 
@@ -22,31 +18,6 @@ logging.basicConfig(filename='./log/wumbot.log', filemode='a', level=logging.INF
                     )
 
 client = WumbotClient(command_prefix='~')
-
-def randWumbo(wumboJSON=None):
-    """
-    Load list of Wumboisms from input JSON file & return a random string from the list
-
-    If no JSON is input, defaults to 'The Game of Wumbo'
-    """
-    if wumboJSON:
-        with open(wumboJSON, mode='r') as fID:
-            wumbolist = json.load(fID)
-            return random.choice(wumbolist)
-    else:
-        return 'The Game of Wumbo'
-
-async def randWumboTimer(sleepseconds=3600, wumboJSON=None):
-    """
-    Async sleep timer to automatically update the bot's Now Playing status
-    """
-    await client.wait_until_ready()
-    while not client.is_closed():
-        wumbogame = Game(name=f"{randWumbo(wumboJSON)}")
-
-        logging.debug(f"Changing game to: '{wumbogame.name}'")
-        await client.change_presence(activity=wumbogame)
-        await asyncio.sleep(sleepseconds)
 
 def loadCredentials(credentialJSON):
     """
@@ -65,7 +36,7 @@ if credentials:
     client.load_extension("cogs.reddit")
 
     # Setup event loops
-    client.loop.create_task(randWumboTimer(wumboJSON='wumbolist.JSON'))
+    client.loop.create_task(wumbopresence.randWumboTimer(client, wumboJSON='wumbolist.JSON'))
     
     p = overwatch.PatchParser(client)
     client.loop.create_task(p.patchcheckloop())
