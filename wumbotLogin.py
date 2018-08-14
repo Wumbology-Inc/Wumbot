@@ -36,10 +36,11 @@ def loadCredentials(credentialJSON):
 
     return credentials
 
-client = WumbotClient(command_prefix='~')
 credentialpath = './credentials.JSON'
 credentials = loadCredentials(credentialpath)
 if credentials:
+    client = WumbotClient(command_prefix='~')
+    
     # Load cogs
     client.load_extension("cogs.bot")
     client.load_extension("cogs.reddit")
@@ -50,6 +51,7 @@ if credentials:
     p = overwatch.PatchParser(client)
     client.loop.create_task(p.patchcheckloop())
 
+    # Finally, try to log in
     client.run(credentials['TOKEN'])
 else:
     logging.info(f"Credential file empty: {credentialpath}")
