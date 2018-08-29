@@ -1,3 +1,4 @@
+import json
 import typing
 from datetime import datetime
 from pathlib import Path
@@ -32,6 +33,8 @@ class PatchParser:
         self.bot = bot
         self.postjsonURL = "https://www.reddit.com/user/itsjieyang/submitted.json"
         self.postchannelID = 477916849879908386
+        self.logJSONpath = Path('./log/postedGIFs.JSON')
+        self.postedGIFs = None
 
     async def getpatchgifs(self, jsonURL: str=None):
         """
@@ -51,8 +54,6 @@ class PatchParser:
             if postobj.subreddit == 'Overwatch' and postobj.title.lower().startswith('patch'):
                 patchposts.append(postobj)
 
-        print(patchposts)
-
         return patchposts
 
     async def postpatchgif(self, channelID: int=None, postobj: RedditPost=None):
@@ -61,27 +62,44 @@ class PatchParser:
         if postobj is None or not isinstance(postobj, RedditPost):
             raise ValueError
 
-        raise NotImplementedError
+        postchannel = self.bot.get_channel(channelID)
+        # TODO: Add more verbose message (embed?)
+        await postchannel.send(discord.Message())
 
-    async def loadposted(self):
-        # TODO: Link to Postgres DB
-        raise NotImplementedError
+    def loadposted(self, logJSONpath: Path=None):
+        logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
+        
+        if logJSONpath.exists():
+            with logJSONpath.open(mode='r') as fID:
+                self.postedGIFs = json.load(fID)
 
-    async def saveposted(self):
-        # TODO: Link to Postgres DB
-        raise NotImplementedError
+    def saveposted(selfself, logJSONpath: Path=None):
+        logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
+        
+        if self.postedGIFs:
+            with logJSONpath.open(mode='w') as fID:
+                json.dump([post[contentURL] for post in self.postedlogs], fID)
 
-    async def patchcheckloop(self, sleepseconds=3600):
-        """
-        Async sleep timer to automatically update the bot's Now Playing status
-        """
-        await self.bot.wait_until_ready()
-        while not self.bot.is_closed():
-            test = await self.getpatchgifs()
-            print(test)
+    async def patchcheck(self):
+        self.loadposted()
 
-            await asyncio.sleep(sleepseconds)
+        posts = await self.getpatchgifs()
+        newposts = [post for post in posts if post not in self.postedGIFs]
+        for post in newposts:
+            await self.postpatchgif(post)
+            self.postedGIFs.append(post)
+        
+        self.saveposted()
 
+
+def patchchecktimer(client, sleepseconds=3600):
+    await self.bot.wait_until_ready()
+
+    p = PatchParser(client)
+    while not self.bot.is_closed():
+        await p.patchcheck()
+
+        await asyncio.sleep(sleepseconds)
 
 def setup(bot):
     bot.add_cog(PatchParser(bot))

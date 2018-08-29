@@ -47,9 +47,7 @@ if credentials:
 
     # Setup event loops
     client.loop.create_task(wumbopresence.randWumboTimer(client, wumboJSON='wumbolist.JSON'))
-    
-    p = overwatch.PatchParser(client)
-    client.loop.create_task(p.patchcheckloop())
+    client.loop.create_task(overwatch.patchchecktimer(client))
 
     # Finally, try to log in
     client.run(credentials['TOKEN'])
