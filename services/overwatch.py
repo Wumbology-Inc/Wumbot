@@ -1,3 +1,4 @@
+import asyncio
 import json
 import typing
 from datetime import datetime
@@ -34,7 +35,7 @@ class PatchParser:
         self.postjsonURL = "https://www.reddit.com/user/itsjieyang/submitted.json"
         self.postchannelID = 477916849879908386
         self.logJSONpath = Path('./log/postedGIFs.JSON')
-        self.postedGIFs = None
+        self.postedGIFs = []
 
     async def getpatchgifs(self, jsonURL: str=None):
         """
@@ -56,7 +57,7 @@ class PatchParser:
 
         return patchposts
 
-    async def postpatchgif(self, channelID: int=None, postobj: RedditPost=None):
+    async def postpatchgif(self, postobj: RedditPost=None, channelID: int=None):
         channelID = channelID if channelID is not None else self.postchannelID
 
         if postobj is None or not isinstance(postobj, RedditPost):
@@ -64,7 +65,7 @@ class PatchParser:
 
         postchannel = self.bot.get_channel(channelID)
         # TODO: Add more verbose message (embed?)
-        await postchannel.send(discord.Message())
+        await postchannel.send(postobj.contentURL)
 
     def loadposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
@@ -73,32 +74,30 @@ class PatchParser:
             with logJSONpath.open(mode='r') as fID:
                 self.postedGIFs = json.load(fID)
 
-    def saveposted(selfself, logJSONpath: Path=None):
+    def saveposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
         
         if self.postedGIFs:
             with logJSONpath.open(mode='w') as fID:
-                json.dump([post[contentURL] for post in self.postedlogs], fID)
+                json.dump(self.postedGIFs, fID)
 
     async def patchcheck(self):
         self.loadposted()
 
         posts = await self.getpatchgifs()
-        newposts = [post for post in posts if post not in self.postedGIFs]
+        newposts = [post for post in posts if post.contentURL not in self.postedGIFs]
         for post in newposts:
             await self.postpatchgif(post)
-            self.postedGIFs.append(post)
+            self.postedGIFs.append(post.contentURL)
         
         self.saveposted()
 
 
-def patchchecktimer(client, sleepseconds=3600):
-    await self.bot.wait_until_ready()
-
+async def patchchecktimer(client, sleepseconds=3600):
+    await client.wait_until_ready()
     p = PatchParser(client)
-    while not self.bot.is_closed():
+    while not client.is_closed():
         await p.patchcheck()
-
         await asyncio.sleep(sleepseconds)
 
 def setup(bot):
