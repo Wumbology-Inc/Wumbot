@@ -6,6 +6,7 @@ from pathlib import Path
 
 import aiohttp
 import discord
+from yarl import URL
 
 
 class RedditPost:
@@ -64,8 +65,15 @@ class PatchParser:
             raise ValueError
 
         postchannel = self.bot.get_channel(channelID)
-        # TODO: Add more verbose message (embed?)
-        await postchannel.send(postobj.contentURL)
+
+        postembed = discord.Embed(title=postobj.title, color=discord.Color(0x9c4af7),
+                                  description=f'[View Full Resolution]({postobj.contentURL})\n\n[View Reddit Post]({postobj.permalink})'
+                                  )
+        postembed.set_author(name='/u/itsjieyang', url='https://www.reddit.com/user/itsjieyang')
+        postembed.set_thumbnail(url='https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png')
+        postembed.set_image(url=self.gfygif(postobj.contentURL))
+        postembed.set_footer(text="Overwatch, it's Ameizing!")
+        await postchannel.send('A new patch gif has been posted!', embed=postembed)
 
     def loadposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
@@ -91,6 +99,18 @@ class PatchParser:
             self.postedGIFs.append(post.contentURL)
         
         self.saveposted()
+
+    @staticmethod
+    def gfygif(inURL: str):
+        """
+        Build a direct gif link from a gfycat URL
+
+        e.g. https://gfycat.com/flippantvariablediplodocus -> https://giant.gfycat.com/FlippantVariableDiplodocus.gif
+
+        Returns a string
+        """
+        gfyID = URL(inURL).path.replace('/', '')
+        return URL.build(scheme="https", host="giant.gfycat.com", path=f"{gfyID}.gif").human_repr()
 
 
 async def patchchecktimer(client, sleepseconds=3600):
