@@ -1,12 +1,11 @@
-import asyncio
 import json
 import logging
-import random
 import time
+from datetime import datetime
 
-from discord import Game
+from discord.ext import commands
 
-from wumbot import WumbotClient
+from services import overwatch, wumbopresence
 
 
 # Force UTC Timestamps
@@ -19,33 +18,14 @@ dateformat = '%Y-%m-%d %H:%M:%S'
 logging.basicConfig(filename='./log/wumbot.log', filemode='a', level=logging.INFO, 
                     format=logformat, datefmt=dateformat
                     )
+class WumbotClient(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super(WumbotClient, self).__init__(*args, **kwargs)
 
-client = WumbotClient(command_prefix='~')
-
-def randWumbo(wumboJSON=None):
-    """
-    Load list of Wumboisms from input JSON file & return a random string from the list
-
-    If no JSON is input, defaults to 'The Game of Wumbo'
-    """
-    if wumboJSON:
-        with open(wumboJSON, mode='r') as fID:
-            wumbolist = json.load(fID)
-            return random.choice(wumbolist)
-    else:
-        return 'The Game of Wumbo'
-
-async def randWumboTimer(sleepseconds=3600, wumboJSON=None):
-    """
-    Async sleep timer to automatically update the bot's Now Playing status
-    """
-    await client.wait_until_ready()
-    while not client.is_closed():
-        wumbogame = Game(name=f"{randWumbo(wumboJSON)}")
-
-        logging.debug(f"Changing game to: '{wumbogame.name}'")
-        await client.change_presence(activity=wumbogame)
-        await asyncio.sleep(sleepseconds)
+    async def on_ready(self):
+        self.launch_time = datetime.utcnow()
+        logging.info(f'Logged in as {self.user}')
+        print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
 
 def loadCredentials(credentialJSON):
     """
@@ -59,7 +39,18 @@ def loadCredentials(credentialJSON):
 credentialpath = './credentials.JSON'
 credentials = loadCredentials(credentialpath)
 if credentials:
-    client.loop.create_task(randWumboTimer(wumboJSON='wumbolist.JSON'))
+    client = WumbotClient(command_prefix='~')
+    
+    # Load cogs
+    client.load_extension("cogs.bot")
+    client.load_extension("cogs.reddit")
+
+    # Setup event loops
+    client.loop.create_task(wumbopresence.randWumboTimer(client, wumboJSON='wumbolist.JSON'))
+    client.loop.create_task(overwatch.patchchecktimer(client))
+
+    # Finally, try to log in
     client.run(credentials['TOKEN'])
 else:
     logging.info(f"Credential file empty: {credentialpath}")
+    raise EnvironmentError

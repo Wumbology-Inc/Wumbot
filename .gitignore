@@ -1,12 +1,16 @@
 # No sharing secret passwords...
 credentials.JSON
+.env
 
 # Caches
 .vscode/
 __pycache__/
 
 # Virtual Envs
-.venv/
+.*env/
+
+# Jupyter
+*.ipynb
 
 # Logs
 *.log
