@@ -1,6 +1,7 @@
 FROM python:3.6-alpine
 # Add git
 RUN apk update && apk upgrade && apk add --no-cache git
+RUN apk add --no-cache bash
 
 # Add build files for PyNaCl
 RUN apk add --no-cache --virtual .pynacl_deps build-base python3-dev libffi-dev
