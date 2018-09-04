@@ -5,7 +5,8 @@ from datetime import datetime
 
 from discord.ext import commands
 
-from services import overwatch, wumbopresence
+from cogs import overwatch
+from services import wumbopresence
 
 
 # Force UTC Timestamps

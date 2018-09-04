@@ -8,27 +8,7 @@ import aiohttp
 import discord
 from yarl import URL
 
-
-class RedditPost:
-    def __init__(self, inJSON:typing.Dict):
-        # Submission type prefixes, per Reddit's API: https://www.reddit.com/dev/api/
-        _types = {'t1':'comment', 't2': 'account', 't3': 'link', 
-                  't4': 'message', 't5': 'subreddit', 't6': 'award'}
-        self._kind = inJSON['kind']  # Retain original
-        self.kind = _types[self._kind]
-
-        # Pull global post ID, tx_yyyy, where tx is the post type and yyyy is Base36 encoded ID
-        self._fullid = inJSON['data']['name']  # Retain original
-        self.id = self._fullid.split('_')[1]
-
-        self.subreddit = inJSON['data']['subreddit']
-        self.title = inJSON['data']['title']
-        self.createdUTC = datetime.utcfromtimestamp(inJSON['data']['created_utc'])
-        self.contentURL = inJSON['data']['url']
-        self.permalink = f"https://www.reddit.com{inJSON['data']['permalink']}"
-        
-    def __repr__(self):
-        return f"{self.title}: {self.permalink}"
+from reddit import RedditPost
 
 class PatchParser:
     def __init__(self, bot):
