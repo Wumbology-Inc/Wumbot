@@ -1,14 +1,17 @@
 import asyncio
 import json
+import re
 import typing
 from datetime import datetime
 from pathlib import Path
 
 import aiohttp
 import discord
+from bs4 import BeautifulSoup
 from yarl import URL
 
 from reddit import RedditPost
+
 
 class PatchGifParser:
     def __init__(self, bot):
@@ -92,18 +95,10 @@ class PatchGifParser:
         gfyID = URL(inURL).path.replace('/', '')
         return URL.build(scheme="https", host="giant.gfycat.com", path=f"{gfyID}.gif").human_repr()
 
-async def patchchecktimer(client, sleepseconds=3600):
-    await client.wait_until_ready()
-    p = PatchGifParser(client)
-    while not client.is_closed():
-        await p.patchcheck()
-        await asyncio.sleep(sleepseconds)
-
 
 class OWPatch():
     def __init__(self, patchref: str=None, ver: str=None, patchdate: datetime=None, 
-                 patchURL: URL=None, 
-                 bannerURL: URL=None
+                 patchURL: URL=None, bannerURL: URL=None
                  ):
         defaultpatchURL = URL('https://playoverwatch.com/en-us/news/patch-notes/pc')
         defaultbannerURL = URL('https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png')
@@ -116,6 +111,102 @@ class OWPatch():
         
     def __repr__(self):
         return f"<OWPatch: v{self.ver}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}>"
+
+
+class PatchNotesParser:
+    def __init__(self, bot):
+        self.bot = bot
+        self.patchesURL = URL('https://playoverwatch.com/en-us/news/patch-notes/pc')
+        self.postchannelID = 477916849879908386
+        self.logJSONpath = Path('./log/postedpatches.JSON')
+        self.postedpatches = []
+    
+    async def getpatches(self, patchesURL: URL=None, ver: str=None) -> typing.List:
+        patchesURL = patchesURL if patchesURL is not None else self.patchesURL
+        async with aiohttp.ClientSession() as session:
+            async with session.get(patchesURL) as resp:
+                r = await resp.text()
+        soup = BeautifulSoup(r, 'html.parser')
+        
+        if ver:
+            # Will require iterating through patch notes pages if the query version is not on the front page
+            raise NotImplementedError
+        else:
+            # Iterate over patches
+            patches = soup.find_all('div', class_='patch-notes-patch')
+        
+        patchobjs = []
+        for patch in patches:
+            # Get patch reference ID
+            patchref = patch.get('id')
+            patchref_num = patchref.split('-')[-1]   # Get numeric reference to build BlizzTrack link later
+
+            # Get version number from sidebar using patch reference ID
+            sidebaritem = soup.select_one(f"a[href=#{patchref}]").parent
+            ver = sidebaritem.find('h3').get_text().split()[-1]
+
+            # Get date
+            dateheader = patch.find('h2', class_='HeadingBanner-header')
+            if dateheader:
+                patchdate = datetime.strptime(dateheader.get_text(), '%B %d, %Y')
+            else:
+                # In the event there is no banner, the date is instead embedded in <h1>Overwatch Patch Notes – June 5, 2018</h1>
+                # Since we already have the sidebar entry, it's slightly simpler to get the date from that instead
+                patchdate = datetime.strptime(sidebaritem.find('p').get_text(), '%m/%d/%Y')
+                
+            # Get patch banner
+            # If there is a banner for the patch, it's embedded in the 'style' portion of the '.HeadingBanner' div
+            # e.g. <div class="HeadingBanner" style="background-image: url(https://link/to.jpg);">
+            patchbannerdiv = patch.select_one('.HeadingBanner')
+            if patchbannerdiv:
+                expr = r"url\(\"?([^\"]+)\"?\)"
+                m = re.search(expr, patchbannerdiv['style'])
+                if m:
+                    patchbanner = URL(m.group(1))
+                else:
+                    patchbanner = None
+            else:
+                patchbanner = None
+
+            patchobjs.append(OWPatch(patchref, ver, patchdate, PatchNotesParser.getblizztrack(patchref_num), patchbanner))
+            
+        return patchobjs
+
+    async def postpatchgif(self, postobj: OWPatch=None, channelID: int=None):
+        channelID = channelID if channelID is not None else self.postchannelID
+        raise NotImplementedError
+
+    def loadposted(self, logJSONpath: Path=None):
+        logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
+        raise NotImplementedError
+
+    def saveposted(self, logJSONpath: Path=None):
+        logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
+        raise NotImplementedError
+
+    async def patchcheck(self):
+        self.loadposted()
+        raise NotImplementedError
+    
+    @staticmethod
+    def getblizztrack(patchref:str) -> URL:
+        """
+        Return BlizzTrack URL to patch notes, built using Blizzard's patchref
+        
+        e.g. https://blizztrack.com/patch_notes/overwatch/50148
+        """
+        baseURL = URL('https://blizztrack.com/patch_notes/overwatch/')
+        return baseURL / patchref
+
+
+async def patchchecktimer(client, sleepseconds=3600):
+    await client.wait_until_ready()
+    parsers = (PatchGifParser(client), PatchNotesParser(client))
+    while not client.is_closed():
+        for p in parsers:
+            await p.patchcheck()
+            
+        await asyncio.sleep(sleepseconds)
 
 def setup(bot):
     pass

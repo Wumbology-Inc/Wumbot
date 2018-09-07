@@ -2,6 +2,7 @@ GitPython >= 2.1
 docker >= 3.0
 aiohttp >= 3.0
 asyncpgsa == 0.23
+beautifulsoup4 >= 4.6.0
 
 # Discord.py Rewrite Branch
 git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py
