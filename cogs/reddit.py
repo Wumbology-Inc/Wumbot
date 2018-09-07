@@ -1,9 +1,32 @@
 import logging
 import re
-from typing import List
+import typing
+from datetime import datetime
 
 import discord
 from discord.ext import commands
+
+
+class RedditPost:
+    def __init__(self, inJSON:typing.Dict):
+        # Submission type prefixes, per Reddit's API: https://www.reddit.com/dev/api/
+        _types = {'t1':'comment', 't2': 'account', 't3': 'link', 
+                  't4': 'message', 't5': 'subreddit', 't6': 'award'}
+        self._kind = inJSON['kind']  # Retain original
+        self.kind = _types[self._kind]
+
+        # Pull global post ID, tx_yyyy, where tx is the post type and yyyy is Base36 encoded ID
+        self._fullid = inJSON['data']['name']  # Retain original
+        self.id = self._fullid.split('_')[1]
+
+        self.subreddit = inJSON['data']['subreddit']
+        self.title = inJSON['data']['title']
+        self.createdUTC = datetime.utcfromtimestamp(inJSON['data']['created_utc'])
+        self.contentURL = inJSON['data']['url']
+        self.permalink = f"https://www.reddit.com{inJSON['data']['permalink']}"
+        
+    def __repr__(self):
+        return f"{self.title}: {self.permalink}"
 
 
 class Reddit():
@@ -11,7 +34,7 @@ class Reddit():
         self.bot = bot
 
     @staticmethod
-    def buildSubredditEmbed(subredditlist: List[str], embedlimit: int=3):
+    def buildSubredditEmbed(subredditlist: typing.List[str], embedlimit: int=3):
         """
         Build a message embed from a list of subreddit strings (sans '/r/')
 
