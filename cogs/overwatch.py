@@ -10,7 +10,7 @@ from yarl import URL
 
 from reddit import RedditPost
 
-class PatchParser:
+class PatchGifParser:
     def __init__(self, bot):
         self.bot = bot
         self.postjsonURL = "https://www.reddit.com/user/itsjieyang/submitted.json"
@@ -92,13 +92,30 @@ class PatchParser:
         gfyID = URL(inURL).path.replace('/', '')
         return URL.build(scheme="https", host="giant.gfycat.com", path=f"{gfyID}.gif").human_repr()
 
-
 async def patchchecktimer(client, sleepseconds=3600):
     await client.wait_until_ready()
-    p = PatchParser(client)
+    p = PatchGifParser(client)
     while not client.is_closed():
         await p.patchcheck()
         await asyncio.sleep(sleepseconds)
 
+
+class OWPatch():
+    def __init__(self, patchref: str=None, ver: str=None, patchdate: datetime=None, 
+                 patchURL: URL=None, 
+                 bannerURL: URL=None
+                 ):
+        defaultpatchURL = URL('https://playoverwatch.com/en-us/news/patch-notes/pc')
+        defaultbannerURL = URL('https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png')
+        
+        self.patchref = patchref
+        self.ver = ver
+        self.patchdate = patchdate
+        self.patchURL = patchURL if patchURL is not None else defaultpatchURL
+        self.bannerURL = bannerURL if bannerURL is not None else defaultbannerURL
+        
+    def __repr__(self):
+        return f"<OWPatch: v{self.ver}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}>"
+
 def setup(bot):
-    bot.add_cog(PatchParser(bot))
+    pass
