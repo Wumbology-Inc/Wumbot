@@ -52,8 +52,8 @@ class PatchGifParser:
         postembed = discord.Embed(title=postobj.title, color=discord.Color(0x9c4af7),
                                   description=f'[View Full Resolution]({postobj.contentURL})\n\n[View Reddit Post]({postobj.permalink})'
                                   )
-        postembed.set_author(name='/u/itsjieyang', url='https://www.reddit.com/user/itsjieyang')
-        postembed.set_thumbnail(url='https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png')
+        postembed.set_author(name='/u/itsjieyang', url=URL('https://www.reddit.com/user/itsjieyang'))
+        postembed.set_thumbnail(url=URL('https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png'))
         postembed.set_image(url=self.gfygif(postobj.contentURL))
         postembed.set_footer(text="Overwatch, it's Ameizing!")
         await postchannel.send('A new patch gif has been posted!', embed=postembed)
@@ -172,9 +172,21 @@ class PatchNotesParser:
             
         return patchobjs
 
-    async def postpatchgif(self, postobj: OWPatch=None, channelID: int=None):
+    async def postpatchnotes(self, postobj: OWPatch=None, channelID: int=None):
         channelID = channelID if channelID is not None else self.postchannelID
-        raise NotImplementedError
+        if postobj is None or not isinstance(postobj, OWPatch):
+            raise ValueError
+
+        postchannel = self.bot.get_channel(channelID)
+
+        postembed = discord.Embed(title=str(postobj), color=discord.Color(0x9c4af7),
+                                  description='Preview not yet implemented'
+                                  )
+        postembed.set_author(name='Blizzard', url=URL('https://playoverwatch.com/en-us/news/patch-notes/pc'), icon_url=URL('http://us.blizzard.com/static/_images/logos/blizzard.jpg'))
+        postembed.set_thumbnail(url=URL('https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png'))
+        postembed.set_image(url=postobj.bannerURL)
+        postembed.set_footer(text="Patch Notes Provided by BlizzTrack")
+        await postchannel.send('A new Overwatch Patch has been released!', embed=postembed)
 
     def loadposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
