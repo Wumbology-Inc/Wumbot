@@ -1,6 +1,7 @@
 import logging
 import re
-from typing import List
+import typing
+from datetime import datetime
 
 import discord
 from discord.ext import commands
@@ -33,7 +34,7 @@ class Reddit():
         self.bot = bot
 
     @staticmethod
-    def buildSubredditEmbed(subredditlist: List[str], embedlimit: int=3):
+    def buildSubredditEmbed(subredditlist: typing.List[str], embedlimit: int=3):
         """
         Build a message embed from a list of subreddit strings (sans '/r/')
 

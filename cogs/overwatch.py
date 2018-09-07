@@ -10,7 +10,7 @@ import discord
 from bs4 import BeautifulSoup
 from yarl import URL
 
-from reddit import RedditPost
+from .reddit import RedditPost
 
 
 class PatchGifParser:
@@ -77,7 +77,7 @@ class PatchGifParser:
 
         posts = await self.getpatchgifs()
         newposts = [post for post in posts if post.contentURL not in self.postedGIFs]
-        for post in newposts:
+        for post in reversed(newposts):  # Attempt to get close to posting in chronological order
             await self.postpatchgif(post)
             self.postedGIFs.append(post.contentURL)
         
@@ -110,7 +110,7 @@ class OWPatch():
         self.bannerURL = bannerURL if bannerURL is not None else defaultbannerURL
         
     def __repr__(self):
-        return f"<OWPatch: v{self.ver}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}>"
+        return f"OWPatch: v{self.ver}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}"
 
 
 class PatchNotesParser:
@@ -180,7 +180,7 @@ class PatchNotesParser:
         postchannel = self.bot.get_channel(channelID)
 
         postembed = discord.Embed(title=str(postobj), color=discord.Color(0x9c4af7),
-                                  description='Preview not yet implemented'
+                                  description=f"[View full patch notes]({postobj.patchURL})"
                                   )
         postembed.set_author(name='Blizzard', url=URL('https://playoverwatch.com/en-us/news/patch-notes/pc'), icon_url=URL('http://us.blizzard.com/static/_images/logos/blizzard.jpg'))
         postembed.set_thumbnail(url=URL('https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png'))
@@ -190,15 +190,28 @@ class PatchNotesParser:
 
     def loadposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
-        raise NotImplementedError
+
+        if logJSONpath.exists():
+            with logJSONpath.open(mode='r') as fID:
+                self.postedpatches = json.load(fID)
 
     def saveposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
-        raise NotImplementedError
+        
+        if self.postedpatches:
+            with logJSONpath.open(mode='w') as fID:
+                json.dump(self.postedpatches, fID)
 
     async def patchcheck(self):
         self.loadposted()
-        raise NotImplementedError
+
+        patches = await self.getpatches()
+        newpatches = [patch for patch in patches if patch.ver not in self.postedpatches]
+        for patch in reversed(newpatches):  # Attempt to get close to posting in chronological order
+            await self.postpatchnotes(patch)
+            self.postedpatches.append(patch.ver)
+        
+        self.saveposted()
     
     @staticmethod
     def getblizztrack(patchref:str) -> URL:
