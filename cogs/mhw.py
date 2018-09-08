@@ -89,7 +89,7 @@ class MHWNewsParser:
         postchannel = self.bot.get_channel(channelID)
 
         postembed = discord.Embed(title=postobj.title, color=discord.Color(0x9c4af7),
-                                  description=f"```{postobj.contents}```"
+                                  description=f"```{postobj.contents}```\n[View full patch notes]({postobj.url})\n"
                                   )
         postembed.set_author(name='Capcom', url=URL('https://steamcommunity.com/app/582010/announcements/'), 
                              icon_url=URL('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Capcom_logo.svg/320px-Capcom_logo.svg')
