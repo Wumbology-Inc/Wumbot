@@ -182,7 +182,9 @@ class PatchNotesParser:
         postembed = discord.Embed(title=str(postobj), color=discord.Color(0x9c4af7),
                                   description=f"[View full patch notes]({postobj.patchURL})"
                                   )
-        postembed.set_author(name='Blizzard', url=URL('https://playoverwatch.com/en-us/news/patch-notes/pc'), icon_url=URL('http://us.blizzard.com/static/_images/logos/blizzard.jpg'))
+        postembed.set_author(name='Blizzard', url=URL('https://playoverwatch.com/en-us/news/patch-notes/pc'), 
+                             icon_url=URL('http://us.blizzard.com/static/_images/logos/blizzard.jpg')
+                             )
         postembed.set_thumbnail(url=URL('https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png'))
         postembed.set_image(url=postobj.bannerURL)
         postembed.set_footer(text="Patch Notes Provided by BlizzTrack")

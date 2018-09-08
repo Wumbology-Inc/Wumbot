@@ -32,7 +32,7 @@ class SteamNewsPost:
         
     @staticmethod
     def getnewsforapp(appID: int=582010, count: int=10, maxlength: int=300, 
-                      format: str='json', **kwargs) -> typing.List[SteamNewsPost]:
+                      format: str='json', **kwargs) -> typing.List:
         apiURL = URL("https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/")
         
         paramdict = {'appID': appID, 'count': count, 'maxlength': maxlength, 'format': format}
@@ -46,7 +46,7 @@ class SteamNewsPost:
         
     @staticmethod
     async def asyncgetnewsforapp(appID: int=582010, count: int=10, maxlength: int=300, 
-                                 format: str='json', **kwargs) -> typing.List[SteamNewsPost]:
+                                 format: str='json', **kwargs) -> typing.List:
         apiURL = URL("https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/")
         
         paramdict = {'appID': appID, 'count': count, 'maxlength': maxlength, 'format': format}
@@ -59,6 +59,90 @@ class SteamNewsPost:
         else:
             return None
 
+class MHWNewsParser:
+    def __init__(self, bot):
+        self.bot = bot
+        self.postchannelID = 477916849879908386
+        self.logJSONpath = Path('./log/postedMHWnews.JSON')
+        self.postedMHWnews = []
+        self.appID = 582010
+        self.officialaccount = "MHW_CAPCOM"
+
+    async def getofficialnews(self, appID: int=None) -> typing.List:
+        """
+        Return a list of SteamNewsPost objects containing official Capcom announcements
+
+        Posts with "Status Update" in the title are excluded
+        """
+        appID = appID if appID is not None else self.appID
+
+        news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=500)
+        officialnews = [item for item in news if self.MHWnewsfilter(item, self.officialaccount)]
+
+        return officialnews
+
+    async def postpatchnotes(self, postobj: SteamNewsPost=None, channelID: int=None):
+        channelID = channelID if channelID is not None else self.postchannelID
+        if postobj is None or not isinstance(postobj, SteamNewsPost):
+            raise ValueError
+
+        postchannel = self.bot.get_channel(channelID)
+
+        postembed = discord.Embed(title=postobj.title, color=discord.Color(0x9c4af7),
+                                  description=f"```{postobj.contents}```"
+                                  )
+        postembed.set_author(name='Capcom', url=URL('https://steamcommunity.com/app/582010/announcements/'), 
+                             icon_url=URL('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Capcom_logo.svg/320px-Capcom_logo.svg')
+                             )
+        postembed.set_thumbnail(url=URL('https://steamcdn-a.akamaihd.net/steam/apps/582010/header.jpg'))
+        postembed.set_footer(text="Brought to you by Palico power!", 
+                             icon_url=URL("https://cdn.discordapp.com/attachments/417527786614554638/487788870193381387/s-l300.png")
+                             )
+        await postchannel.send('A new MHW news post has been released!', embed=postembed)
+
+    def loadposted(self, logJSONpath: Path=None):
+        logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
+        
+        if logJSONpath.exists():
+            with logJSONpath.open(mode='r') as fID:
+                self.postedMHWnews = [URL(urlstr) for urlstr in json.load(fID)]
+
+    def saveposted(self, logJSONpath: Path=None):
+        logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
+        
+        if self.postedMHWnews:
+            with logJSONpath.open(mode='w') as fID:
+                json.dump([str(url) for url in self.postedMHWnews], fID)
+
+    async def patchcheck(self):
+        self.loadposted()
+
+        posts = await self.getofficialnews()
+        newposts = [post for post in posts if post.url not in self.postedMHWnews]
+        for post in reversed(newposts):  # Attempt to get close to posting in chronological order
+            await self.postpatchnotes(post)
+            self.postedMHWnews.append(post.url)
+        
+        self.saveposted()
+
+    @staticmethod
+    def MHWnewsfilter(item: SteamNewsPost=None, officialaccount: str=None) -> bool:
+        if not item or not officialaccount:
+            raise ValueError
+
+        if item.author != officialaccount:
+            return False
+
+        return "status update" not in item.title.lower()
+
+async def patchchecktimer(client, sleepseconds=3600):
+    await client.wait_until_ready()
+    parsers = (MHWNewsParser(client),)
+    while not client.is_closed():
+        for p in parsers:
+            await p.patchcheck()
+            
+        await asyncio.sleep(sleepseconds)
 
 def setup(bot):
     pass
