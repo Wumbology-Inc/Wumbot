@@ -62,7 +62,7 @@ class SteamNewsPost:
 class MHWNewsParser:
     def __init__(self, bot):
         self.bot = bot
-        self.postchannelID = 477916849879908386
+        self.postchannelID = 478568995767713793
         self.logJSONpath = Path('./log/postedMHWnews.JSON')
         self.postedMHWnews = []
         self.appID = 582010
