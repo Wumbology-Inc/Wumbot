@@ -5,8 +5,7 @@ from datetime import datetime
 
 from discord.ext import commands
 
-from cogs import overwatch
-from services import wumbopresence
+from cogs import overwatch, mhw, wumbopresence
 
 
 # Force UTC Timestamps
@@ -49,6 +48,7 @@ if credentials:
     # Setup event loops
     client.loop.create_task(wumbopresence.randWumboTimer(client, wumboJSON='wumbolist.JSON'))
     client.loop.create_task(overwatch.patchchecktimer(client))
+    client.loop.create_task(mhw.patchchecktimer(client))
 
     # Finally, try to log in
     client.run(credentials['TOKEN'])

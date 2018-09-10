@@ -10,7 +10,7 @@ __pycache__/
 .*env/
 
 # Jupyter
-*.ipynb
+*.ipynb*
 
 # Logs
 *.log
