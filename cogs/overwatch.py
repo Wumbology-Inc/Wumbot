@@ -36,7 +36,7 @@ class PatchGifParser:
             postobj = RedditPost(postjson)
 
             # So far, patch notes GIFs we want are from /r/Overwatch and start with "patch"
-            if postobj.subreddit == 'Overwatch' and postobj.title.lower().startswith('patch'):
+            if postobj.subreddit == 'Overwatch' and 'patch' in postobj.title.lower():
                 patchposts.append(postobj)
 
         return patchposts
