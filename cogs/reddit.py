@@ -4,7 +4,9 @@ import typing
 from datetime import datetime
 
 import discord
+import requests
 from discord.ext import commands
+from yarl import URL
 
 
 class RedditPost:
@@ -27,6 +29,101 @@ class RedditPost:
         
     def __repr__(self):
         return f"{self.title}: {self.permalink}"
+
+    @staticmethod
+    def fromJSON(jsonURL: str=None) -> typing.List:
+        """
+        Return a list of RedditPost from an input Reddit JSON URL
+
+        Supported URL schemas are:
+            https://old.reddit.com/u(ser)/username/submitted(/).json
+            https://old.reddit.com/r/subreddit(/).json
+            https://old.reddit.com/r/subreddit/comments/*(/).json
+
+        Other input URL formats are not supported
+        """
+        if not jsonURL:
+            raise ValueError
+        
+        if not isinstance(jsonURL, URL):
+            jsonURL = URL(jsonURL)
+
+        if not RedditPost._isredditJSON(jsonURL):
+            raise ValueError
+
+        if RedditPost._isusernonsubmission(jsonURL):
+            raise ValueError
+
+        jsonresponse = requests.get(jsonURL).json()
+        if isinstance(jsonresponse, list):
+            # Reddit Post JSON contains a list of 2 dicts, one for the post and one for the comments
+            # Comments are ignored for now
+            postlist = jsonresponse[0]['data']['children']
+        else:
+            # Everything else should just be a bare dictionary
+            postlist = jsonresponse['data']['children']
+            
+        return [RedditPost(post) for post in postlist]
+    
+    @staticmethod
+    def fromURL(inURL: str=None) -> typing.List:
+        """
+        Return a list of RedditPost objects from an input Reddit URL
+
+        Supported URL schemas are:
+            https://old.reddit.com/u(ser)/username/submitted(/)
+            https://old.reddit.com/r/subreddit(/)
+            https://old.reddit.com/r/subreddit/comments/*
+
+        Other input URL formats are not supported
+        """
+        if not inURL:
+            raise ValueError
+
+        if RedditPost._isusernonsubmission(jsonURL):
+            raise ValueError
+        
+        inURL = URL(inURL)
+        if RedditPost._isredditJSON(inURL):
+            return RedditPost.fromJSON(inURL)
+        else:
+            return RedditPost.fromJSON(inURL.join(URL('.json')))
+
+    @staticmethod
+    def asyncfromJSON(jsonURL: str=None) -> typing.List:
+        raise NotImplementedError
+    
+    @staticmethod
+    def asyncfromURL(inURL: str=None) -> typing.List:
+        raise NotImplementedError
+    
+    @staticmethod
+    def _isredditJSON(inURL: URL=None) -> bool:
+        if not inURL or not isinstance(inURL, URL):
+            raise ValueError
+        
+        # Check to see if '.json' is already appended
+        return '.json' in inURL.parts[-1].lower()
+
+    @staticmethod
+    def _isusernonsubmission(inURL: URL=None) -> bool:
+        """
+        Test Reddit URL for valid User link construction
+
+        Return True if the URL is a Reddit user URL that is not their submissions
+        e.g. https://old.reddit.com/user/username/comments/ or https://old.reddit.com/u/username/
+
+        Otherwise, return False
+        """
+        if not inURL or not isinstance(inURL, URL):
+            raise ValueError
+
+        expr = r'/u(?:ser)?/\w+'
+        urlparts = inURL.path.lower()
+        if re.search(expr, urlparts):
+            return 'submitted' not in urlparts
+        else:
+            return False
 
 
 class Reddit():
