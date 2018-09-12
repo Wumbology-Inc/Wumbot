@@ -7,6 +7,7 @@ from pathlib import Path
 
 import aiohttp
 import discord
+import requests
 from bs4 import BeautifulSoup
 from yarl import URL
 
@@ -105,28 +106,43 @@ class OWPatch():
     def __repr__(self):
         return f"OWPatch: v{self.ver}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}"
 
+    @staticmethod
+    def fromURL(inURL: str='https://playoverwatch.com/en-us/news/patch-notes/pc') -> typing.List:
+        """
+        Return a list of OWPatch objects from Blizzard's Patch Notes
+        """
+        raise NotImplementedError
+        if not inURL:
+            raise ValueError
+        inURL = URL(inURL)
 
-class PatchNotesParser:
-    def __init__(self, bot):
-        self.bot = bot
-        self.patchesURL = URL('https://playoverwatch.com/en-us/news/patch-notes/pc')
-        self.postchannelID = 477916849879908386
-        self.logJSONpath = Path('./log/postedpatches.JSON')
-        self.postedpatches = []
-    
-    async def getpatches(self, patchesURL: URL=None, ver: str=None) -> typing.List:
-        patchesURL = patchesURL if patchesURL is not None else self.patchesURL
-        async with aiohttp.ClientSession() as session:
-            async with session.get(patchesURL) as resp:
-                r = await resp.text()
-        soup = BeautifulSoup(r, 'html.parser')
+        r = requests.get(inURL).text
         
-        if ver:
-            # Will require iterating through patch notes pages if the query version is not on the front page
-            raise NotImplementedError
-        else:
-            # Iterate over patches
-            patches = soup.find_all('div', class_='patch-notes-patch')
+        return OWPatch._parseOWpatchHTML(r)
+
+    @staticmethod
+    async def asyncfromURL(inURL: str='https://playoverwatch.com/en-us/news/patch-notes/pc') -> typing.List:
+        """
+        This function is a coroutine
+
+        Return a list of OWPatch objects from Blizzard's Patch Notes
+        """
+        if not inURL:
+            raise ValueError
+        inURL = URL(inURL)
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(inURL) as resp:
+                r = await resp.text()
+        
+        return OWPatch._parseOWpatchHTML(r)
+
+    @staticmethod
+    def _parseOWpatchHTML(inHTML: str) -> typing.List:
+        soup = BeautifulSoup(inHTML, 'html.parser')
+        
+        # Iterate over patches
+        patches = soup.find_all('div', class_='patch-notes-patch')
         
         patchobjs = []
         for patch in patches:
@@ -162,8 +178,17 @@ class PatchNotesParser:
                 patchbanner = None
 
             patchobjs.append(OWPatch(patchref, ver, patchdate, PatchNotesParser.getblizztrack(patchref_num), patchbanner))
-            
+        
         return patchobjs
+
+
+class PatchNotesParser:
+    def __init__(self, bot):
+        self.bot = bot
+        self.patchesURL = URL('https://playoverwatch.com/en-us/news/patch-notes/pc')
+        self.postchannelID = 477916849879908386
+        self.logJSONpath = Path('./log/postedpatches.JSON')
+        self.postedpatches = []
 
     async def postpatchnotes(self, postobj: OWPatch=None, channelID: int=None):
         channelID = channelID if channelID is not None else self.postchannelID
@@ -200,7 +225,7 @@ class PatchNotesParser:
     async def patchcheck(self):
         self.loadposted()
 
-        patches = await self.getpatches()
+        patches = await OWPatch.asyncfromURL(self.patchesURL)
         newpatches = [patch for patch in patches if patch.ver not in self.postedpatches]
         for patch in reversed(newpatches):  # Attempt to get close to posting in chronological order
             await self.postpatchnotes(patch)
