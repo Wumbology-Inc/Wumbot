@@ -26,15 +26,8 @@ class PatchGifParser:
         Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
         """
         jsonURL = jsonURL if jsonURL is not None else self.postjsonURL
-        async with aiohttp.ClientSession() as session:
-            async with session.get(jsonURL) as resp:
-                rawdict = await resp.json()
-                submissions = rawdict['data']['children']
-
-        patchposts = []
-        for postjson in submissions:
-            postobj = RedditPost(postjson)
-
+        postobjs = RedditPost.asyncfromJSON(postjsonURL)
+        for postobj in postobjs:
             # So far, patch notes GIFs we want are from /r/Overwatch and start with "patch"
             if postobj.subreddit == 'Overwatch' and 'patch' in postobj.title.lower():
                 patchposts.append(postobj)
