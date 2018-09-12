@@ -3,6 +3,7 @@ import re
 import typing
 from datetime import datetime
 
+import aiohttp
 import discord
 import requests
 from discord.ext import commands
@@ -90,12 +91,70 @@ class RedditPost:
             return RedditPost.fromJSON(inURL.join(URL('.json')))
 
     @staticmethod
-    def asyncfromJSON(jsonURL: str=None) -> typing.List:
-        raise NotImplementedError
+    async def asyncfromJSON(jsonURL: str=None) -> typing.List:
+        """
+        This function is a coroutine
+
+        Return a list of RedditPost from an input Reddit JSON URL
+
+        Supported URL schemas are:
+            https://old.reddit.com/u(ser)/username/submitted(/).json
+            https://old.reddit.com/r/subreddit(/).json
+            https://old.reddit.com/r/subreddit/comments/*(/).json
+
+        Other input URL formats are not supported
+        """
+        if not jsonURL:
+            raise ValueError
+        
+        if not isinstance(jsonURL, URL):
+            jsonURL = URL(jsonURL)
+
+        if not RedditPost._isredditJSON(jsonURL):
+            raise ValueError
+
+        if RedditPost._isusernonsubmission(jsonURL):
+            raise ValueError
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(jsonURL) as resp:
+                jsonresponse = await resp.json()
+    
+        if isinstance(jsonresponse, list):
+            # Reddit Post JSON contains a list of 2 dicts, one for the post and one for the comments
+            # Comments are ignored for now
+            postlist = jsonresponse[0]['data']['children']
+        else:
+            # Everything else should just be a bare dictionary
+            postlist = jsonresponse['data']['children']
+            
+        return [RedditPost(post) for post in postlist]
     
     @staticmethod
-    def asyncfromURL(inURL: str=None) -> typing.List:
-        raise NotImplementedError
+    async def asyncfromURL(inURL: str=None) -> typing.List:
+        """
+        This function is a coroutine
+
+        Return a list of RedditPost objects from an input Reddit URL
+
+        Supported URL schemas are:
+            https://old.reddit.com/u(ser)/username/submitted(/)
+            https://old.reddit.com/r/subreddit(/)
+            https://old.reddit.com/r/subreddit/comments/*
+
+        Other input URL formats are not supported
+        """
+        if not inURL:
+            raise ValueError
+
+        if RedditPost._isusernonsubmission(jsonURL):
+            raise ValueError
+        
+        inURL = URL(inURL)
+        if RedditPost._isredditJSON(inURL):
+            return await RedditPost.asyncfromJSON(inURL)
+        else:
+            return await RedditPost.asyncfromJSON(inURL.join(URL('.json')))
     
     @staticmethod
     def _isredditJSON(inURL: URL=None) -> bool:
