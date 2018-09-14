@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import re
 import typing
 from datetime import datetime
@@ -12,6 +13,7 @@ from bs4 import BeautifulSoup
 from discord.ext import commands
 from yarl import URL
 
+from .bot import Helpers
 from .reddit import RedditPost
 
 
@@ -262,6 +264,30 @@ async def patchchecktimer(client, sleepseconds=3600):
 class OverwatchCommands:
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    async def checkOWgif(self, ctx: commands.Context):
+        if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
+            logging.info(f'Manual OW patch GIF check initiated by {ctx.message.author}')
+            await ctx.send("Manual OW patch GIF parsing starting now...")
+            await PatchGifParser(self.bot).patchcheck()
+        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
+            await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
+        else:
+            logging.info(f'Manual OW patch GIF check attempted by {ctx.message.author}')
+            await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
+
+    @commands.command()
+    async def checkOWpatch(self, ctx: commands.Context):
+        if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
+            logging.info(f'Manual OW patch check initiated by {ctx.message.author}')
+            await ctx.send("Manual OW patch notes parsing starting now...")
+            await PatchNotesParser(self.bot).patchcheck()
+        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
+            await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
+        else:
+            logging.info(f'Manual OW patch check attempted by {ctx.message.author}')
+            await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
 
 def setup(bot):
     bot.add_cog(OverwatchCommands(bot))

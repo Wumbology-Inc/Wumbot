@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import typing
 from datetime import datetime
 from pathlib import Path
@@ -9,6 +10,7 @@ import discord
 from discord.ext import commands
 from yarl import URL
 
+from .bot import Helpers
 
 class SteamNewsPost:
     def __init__(self, gid: str=None, title: str=None, url: str=None, is_external_url: bool=None, 
@@ -153,6 +155,18 @@ async def patchchecktimer(client, sleepseconds=3600):
 class MHWCommands:
     def __init__(self, bot):
         self.bot = bot
+
+    @commands.command()
+    async def checkMHWpatch(self, ctx: commands.Context):
+        if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
+            logging.info(f'Manual MHW news check initiated by {ctx.message.author}')
+            await ctx.send("Manual MHW news parsing starting now...")
+            await MHWNewsParser(self.bot).patchcheck()
+        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
+            await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
+        else:
+            logging.info(f'Manual MHW news check attempted by {ctx.message.author}')
+            await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
 
 def setup(bot):
     bot.add_cog(MHWCommands(bot))
