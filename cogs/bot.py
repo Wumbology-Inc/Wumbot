@@ -44,7 +44,7 @@ class MainCommands():
             logging.info('Bot session killed by Owner')
             await ctx.send('Shutting down... :wave:')
             await self.bot.close()
-        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
+        elif Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
             await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
         else:
             logging.info(f'Unauthorized kill attempt by {ctx.message.author}')
@@ -66,7 +66,7 @@ class Helpers:
 
         A DM is either an instance of DMChannel or GroupChannel
         """
-        return not isinstance(channel, discord.TextChannel)
+        return isinstance(channel, (discord.DMChannel, discord.GroupChannel))
 
 
 def setup(bot):
