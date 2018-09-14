@@ -1,13 +1,16 @@
 import asyncio
 import json
+import logging
 import typing
 from datetime import datetime
 from pathlib import Path
 
 import aiohttp
 import discord
+from discord.ext import commands
 from yarl import URL
 
+from .bot import Helpers
 
 class SteamNewsPost:
     def __init__(self, gid: str=None, title: str=None, url: str=None, is_external_url: bool=None, 
@@ -83,13 +86,15 @@ class MHWNewsParser:
 
     async def postpatchnotes(self, postobj: SteamNewsPost=None, channelID: int=None):
         channelID = channelID if channelID is not None else self.postchannelID
-        if postobj is None or not isinstance(postobj, SteamNewsPost):
-            raise ValueError
+        if postobj is None:
+            raise ValueError("No postobj provided")
+        if not isinstance(postobj, SteamNewsPost):
+            raise TypeError(f"Invalid post object type provided: '{type(postobj)}', input must be SteamNewsPost")
 
         postchannel = self.bot.get_channel(channelID)
 
         postembed = discord.Embed(title=postobj.title, color=discord.Color(0x9c4af7),
-                                  description=f"```{postobj.contents}```\n[View full patch notes]({postobj.url})\n"
+                                  description=f"```{postobj.contents}```\n[View full news post]({postobj.url})\n"
                                   )
         postembed.set_author(name='Capcom', url=URL('https://steamcommunity.com/app/582010/announcements/'), 
                              icon_url=URL('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Capcom_logo.svg/320px-Capcom_logo.svg')
@@ -127,8 +132,10 @@ class MHWNewsParser:
 
     @staticmethod
     def MHWnewsfilter(item: SteamNewsPost=None, officialaccount: str=None) -> bool:
-        if not item or not officialaccount:
-            raise ValueError
+        if not item:
+            raise ValueError("No post object provided")
+        if not officialaccount:
+            raise ValueError("No account name provided")
 
         if item.author != officialaccount:
             return False
@@ -144,5 +151,22 @@ async def patchchecktimer(client, sleepseconds=3600):
             
         await asyncio.sleep(sleepseconds)
 
+
+class MHWCommands:
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command()
+    async def checkMHWpatch(self, ctx: commands.Context):
+        if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
+            logging.info(f'Manual MHW news check initiated by {ctx.message.author}')
+            await ctx.send("Manual MHW news parsing starting now...")
+            await MHWNewsParser(self.bot).patchcheck()
+        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
+            await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
+        else:
+            logging.info(f'Manual MHW news check attempted by {ctx.message.author}')
+            await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
+
 def setup(bot):
-    pass
+    bot.add_cog(MHWCommands(bot))

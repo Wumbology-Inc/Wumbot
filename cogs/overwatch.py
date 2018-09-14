@@ -1,5 +1,6 @@
 import asyncio
 import json
+import logging
 import re
 import typing
 from datetime import datetime
@@ -9,8 +10,10 @@ import aiohttp
 import discord
 import requests
 from bs4 import BeautifulSoup
+from discord.ext import commands
 from yarl import URL
 
+from .bot import Helpers
 from .reddit import RedditPost
 
 
@@ -40,8 +43,10 @@ class PatchGifParser:
     async def postpatchgif(self, postobj: RedditPost=None, channelID: int=None):
         channelID = channelID if channelID is not None else self.postchannelID
 
-        if postobj is None or not isinstance(postobj, RedditPost):
-            raise ValueError
+        if postobj is None:
+            raise ValueError("No post object provided")
+        if not isinstance(postobj, RedditPost):
+            raise TypeError(f"Invalid post type provided: '{type(postobj)}', input must be RedditPost")
 
         postchannel = self.bot.get_channel(channelID)
 
@@ -113,9 +118,8 @@ class OWPatch():
         """
         Return a list of OWPatch objects from Blizzard's Patch Notes
         """
-        raise NotImplementedError
         if not inURL:
-            raise ValueError
+            raise ValueError("No URL provided")
         inURL = URL(inURL)
 
         r = requests.get(inURL).text
@@ -130,7 +134,7 @@ class OWPatch():
         Return a list of OWPatch objects from Blizzard's Patch Notes
         """
         if not inURL:
-            raise ValueError
+            raise ValueError("No URL provided")
         inURL = URL(inURL)
 
         async with aiohttp.ClientSession() as session:
@@ -194,8 +198,10 @@ class PatchNotesParser:
 
     async def postpatchnotes(self, postobj: OWPatch=None, channelID: int=None):
         channelID = channelID if channelID is not None else self.postchannelID
-        if postobj is None or not isinstance(postobj, OWPatch):
-            raise ValueError
+        if postobj is None:
+            raise ValueError("No post object provided")
+        if not isinstance(postobj, OWPatch):
+            raise TypeError(f"Invalid object type provided: '{type(postobj)}', input must be OWPatch")
 
         postchannel = self.bot.get_channel(channelID)
 
@@ -255,5 +261,33 @@ async def patchchecktimer(client, sleepseconds=3600):
             
         await asyncio.sleep(sleepseconds)
 
+class OverwatchCommands:
+    def __init__(self, bot):
+        self.bot = bot
+
+    @commands.command()
+    async def checkOWgif(self, ctx: commands.Context):
+        if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
+            logging.info(f'Manual OW patch GIF check initiated by {ctx.message.author}')
+            await ctx.send("Manual OW patch GIF parsing starting now...")
+            await PatchGifParser(self.bot).patchcheck()
+        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
+            await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
+        else:
+            logging.info(f'Manual OW patch GIF check attempted by {ctx.message.author}')
+            await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
+
+    @commands.command()
+    async def checkOWpatch(self, ctx: commands.Context):
+        if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
+            logging.info(f'Manual OW patch check initiated by {ctx.message.author}')
+            await ctx.send("Manual OW patch notes parsing starting now...")
+            await PatchNotesParser(self.bot).patchcheck()
+        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
+            await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
+        else:
+            logging.info(f'Manual OW patch check attempted by {ctx.message.author}')
+            await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
+
 def setup(bot):
-    pass
+    bot.add_cog(OverwatchCommands(bot))

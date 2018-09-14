@@ -44,6 +44,8 @@ if credentials:
     # Load cogs
     client.load_extension("cogs.bot")
     client.load_extension("cogs.reddit")
+    client.load_extension("cogs.overwatch")
+    client.load_extension("cogs.mhw")
 
     # Setup event loops
     client.loop.create_task(wumbopresence.randWumboTimer(client, wumboJSON='wumbolist.JSON'))

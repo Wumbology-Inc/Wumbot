@@ -44,16 +44,16 @@ class RedditPost:
         Other input URL formats are not supported
         """
         if not jsonURL:
-            raise ValueError
+            raise ValueError("No URL provided")
         
         if not isinstance(jsonURL, URL):
             jsonURL = URL(jsonURL)
 
         if not RedditPost._isredditJSON(jsonURL):
-            raise ValueError
+            raise ValueError(f"Invalid Reddit JSON URL provided: '{jsonURL}'\nURLs must end with '.json'")
 
         if RedditPost._isusernonsubmission(jsonURL):
-            raise ValueError
+            raise ValueError(f"Unsupported Reddit User link: '{jsonURL}'\nOnly user submissions are supported")
 
         jsonresponse = requests.get(jsonURL).json()
         if isinstance(jsonresponse, list):
@@ -79,10 +79,10 @@ class RedditPost:
         Other input URL formats are not supported
         """
         if not inURL:
-            raise ValueError
+            raise ValueError("No URL provided")
 
         if RedditPost._isusernonsubmission(jsonURL):
-            raise ValueError
+            raise ValueError(f"Unsupported Reddit User link: '{jsonURL}'\nOnly user submissions are supported")
         
         inURL = URL(inURL)
         if RedditPost._isredditJSON(inURL):
@@ -105,16 +105,16 @@ class RedditPost:
         Other input URL formats are not supported
         """
         if not jsonURL:
-            raise ValueError
+            raise ValueError("No URL provided")
         
         if not isinstance(jsonURL, URL):
             jsonURL = URL(jsonURL)
 
         if not RedditPost._isredditJSON(jsonURL):
-            raise ValueError
+            raise ValueError(f"Unsupported Reddit User link: '{jsonURL}'\nOnly user submissions are supported")
 
         if RedditPost._isusernonsubmission(jsonURL):
-            raise ValueError
+            raise ValueError(f"Unsupported Reddit User link: '{jsonURL}'\nOnly user submissions are supported")
 
         async with aiohttp.ClientSession() as session:
             async with session.get(jsonURL) as resp:
@@ -145,10 +145,10 @@ class RedditPost:
         Other input URL formats are not supported
         """
         if not inURL:
-            raise ValueError
+            raise ValueError("No URL provided")
 
         if RedditPost._isusernonsubmission(jsonURL):
-            raise ValueError
+            raise ValueError(f"Unsupported Reddit User link: '{jsonURL}'\nOnly user submissions are supported")
         
         inURL = URL(inURL)
         if RedditPost._isredditJSON(inURL):
@@ -158,8 +158,10 @@ class RedditPost:
     
     @staticmethod
     def _isredditJSON(inURL: URL=None) -> bool:
-        if not inURL or not isinstance(inURL, URL):
-            raise ValueError
+        if not inURL:
+            raise ValueError("No URL provided")
+        if not isinstance(inURL, URL):
+            raise TypeError(f"Invalid URL type: '{type(inURL)}', input must be yarl.URL")
         
         # Check to see if '.json' is already appended
         return '.json' in inURL.parts[-1].lower()
@@ -174,8 +176,10 @@ class RedditPost:
 
         Otherwise, return False
         """
-        if not inURL or not isinstance(inURL, URL):
-            raise ValueError
+        if not inURL:
+            raise ValueError("No URL provided")
+        if not isinstance(inURL, URL):
+            raise TypeError(f"Invalid URL type: '{type(inURL)}', input must be yarl.URL")
 
         expr = r'/u(?:ser)?/\w+'
         urlparts = inURL.path.lower()
