@@ -40,16 +40,17 @@ class MainCommands():
 
         Only valid if bot owner invokes the command in a DM
         """
-        if self.isDM(ctx.message.channel) and self.isOwner(ctx.message.author):
+        if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
             logging.info('Bot session killed by Owner')
             await ctx.send('Shutting down... :wave:')
             await self.bot.close()
-        if self.isOwner(ctx.message.author) and not self.isDM(ctx.message.channel):
+        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
             await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
         else:
             logging.info(f'Unauthorized kill attempt by {ctx.message.author}')
             await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
 
+class Helpers:
     @staticmethod
     def isOwner(user: discord.User):
         """
@@ -66,6 +67,7 @@ class MainCommands():
         A DM is either an instance of DMChannel or GroupChannel
         """
         return not isinstance(channel, discord.TextChannel)
+
 
 def setup(bot):
     bot.add_cog(MainCommands(bot))
