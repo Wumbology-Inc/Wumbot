@@ -9,6 +9,7 @@ import aiohttp
 import discord
 import requests
 from bs4 import BeautifulSoup
+from discord.ext import commands
 from yarl import URL
 
 from .reddit import RedditPost
@@ -40,8 +41,10 @@ class PatchGifParser:
     async def postpatchgif(self, postobj: RedditPost=None, channelID: int=None):
         channelID = channelID if channelID is not None else self.postchannelID
 
-        if postobj is None or not isinstance(postobj, RedditPost):
-            raise ValueError
+        if postobj is None:
+            raise ValueError("No post object provided")
+        if not isinstance(postobj, RedditPost):
+            raise TypeError(f"Invalid post type provided: '{type(postobj)}', input must be RedditPost")
 
         postchannel = self.bot.get_channel(channelID)
 
@@ -113,9 +116,8 @@ class OWPatch():
         """
         Return a list of OWPatch objects from Blizzard's Patch Notes
         """
-        raise NotImplementedError
         if not inURL:
-            raise ValueError
+            raise ValueError("No URL provided")
         inURL = URL(inURL)
 
         r = requests.get(inURL).text
@@ -130,7 +132,7 @@ class OWPatch():
         Return a list of OWPatch objects from Blizzard's Patch Notes
         """
         if not inURL:
-            raise ValueError
+            raise ValueError("No URL provided")
         inURL = URL(inURL)
 
         async with aiohttp.ClientSession() as session:
@@ -194,8 +196,10 @@ class PatchNotesParser:
 
     async def postpatchnotes(self, postobj: OWPatch=None, channelID: int=None):
         channelID = channelID if channelID is not None else self.postchannelID
-        if postobj is None or not isinstance(postobj, OWPatch):
-            raise ValueError
+        if postobj is None:
+            raise ValueError("No post object provided")
+        if not isinstance(postobj, OWPatch):
+            raise TypeError(f"Invalid object type provided: '{type(postobj)}', input must be OWPatch")
 
         postchannel = self.bot.get_channel(channelID)
 
@@ -255,5 +259,9 @@ async def patchchecktimer(client, sleepseconds=3600):
             
         await asyncio.sleep(sleepseconds)
 
+class OverwatchCommands:
+    def __init__(self, bot):
+        self.bot = bot
+
 def setup(bot):
-    pass
+    bot.add_cog(OverwatchCommands(bot))
