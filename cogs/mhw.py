@@ -162,7 +162,7 @@ class MHWCommands:
             logging.info(f'Manual MHW news check initiated by {ctx.message.author}')
             await ctx.send("Manual MHW news parsing starting now...")
             await MHWNewsParser(self.bot).patchcheck()
-        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
+        elif Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
             await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
         else:
             logging.info(f'Manual MHW news check attempted by {ctx.message.author}')
