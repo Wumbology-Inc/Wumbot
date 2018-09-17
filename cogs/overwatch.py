@@ -271,7 +271,7 @@ class OverwatchCommands:
             logging.info(f'Manual OW patch GIF check initiated by {ctx.message.author}')
             await ctx.send("Manual OW patch GIF parsing starting now...")
             await PatchGifParser(self.bot).patchcheck()
-        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
+        elif Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
             await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
         else:
             logging.info(f'Manual OW patch GIF check attempted by {ctx.message.author}')
@@ -283,7 +283,7 @@ class OverwatchCommands:
             logging.info(f'Manual OW patch check initiated by {ctx.message.author}')
             await ctx.send("Manual OW patch notes parsing starting now...")
             await PatchNotesParser(self.bot).patchcheck()
-        if Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
+        elif Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
             await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
         else:
             logging.info(f'Manual OW patch check attempted by {ctx.message.author}')
