@@ -20,11 +20,11 @@ Parser Reference
 
         Path to JSON storage file
 
-    .. attribute:: postedMHWnews(List[str])
+    .. attribute:: postedMHWnews(List[yarl.URL])
 
         ``List`` containing posted news posts
 
-        Patches are stored as Steam news permalinks, as ``str`` (e.g. ``'https://steamcommunity.com/games/582010/announcements/detail/1689302358462352379'``)
+        Patches are stored as Steam news permalinks, as ``yarl.URL`` (e.g. ``[URL('https://steamcommunity.com/games/582010/announcements/detail/1689302358462352379')]``)
 
     .. attribute:: appID(int)
 

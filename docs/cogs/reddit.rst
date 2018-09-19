@@ -57,7 +57,7 @@ Class Reference
 
         Post creation date (UTC)
 
-    .. attribute:: contentURL(str)
+    .. attribute:: contentURL(yarl.URL)
 
         Submission permalink
 
@@ -75,7 +75,7 @@ Class Reference
 
         Other input URL formats are not supported
 
-    .. staticmethod:: fromURL(inURL: str=None) -> typing.List:
+    .. staticmethod:: fromURL(inURL: typing.Union[str, yarl.URL]=None) -> typing.List:
 
         Return a list of ``reddit.RedditPost`` objects from an input Reddit URL
 
@@ -89,7 +89,7 @@ Class Reference
 
         Other input URL formats are not supported
 
-    .. comethod:: asyncfromURL(inURL: str=None) -> typing.List:
+    .. comethod:: asyncfromURL(inURL: typing.Union[str, yarl.URL]=None) -> typing.List:
         :staticmethod:
 
         Return a list of ``reddit.RedditPost`` objects from an input Reddit URL

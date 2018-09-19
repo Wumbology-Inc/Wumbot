@@ -20,12 +20,12 @@ from .reddit import RedditPost
 class PatchGifParser:
     def __init__(self, bot):
         self.bot = bot
-        self.postjsonURL = "https://www.reddit.com/user/itsjieyang/submitted.json"
+        self.postjsonURL = URL("https://www.reddit.com/user/itsjieyang/submitted.json")
         self.postchannelID = 477916849879908386
         self.logJSONpath = Path('./log/postedGIFs.JSON')
         self.postedGIFs = []
 
-    async def getpatchgifs(self, jsonURL: str=None):
+    async def getpatchgifs(self, jsonURL: URL=None):
         """
         Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
         """
@@ -80,12 +80,12 @@ class PatchGifParser:
         newposts = [post for post in posts if post.contentURL not in self.postedGIFs]
         for post in reversed(newposts):  # Attempt to get close to posting in chronological order
             await self.postpatchgif(post)
-            self.postedGIFs.append(post.contentURL)
+            self.postedGIFs.append(post.contentURL.human_repr())
         
         self.saveposted()
 
     @staticmethod
-    def gfygif(inURL: str):
+    def gfygif(inURL: typing.Union[str, URL]) -> URL:
         """
         Build a direct gif link from a gfycat URL
 
@@ -94,7 +94,7 @@ class PatchGifParser:
         Returns a string
         """
         gfyID = URL(inURL).path.replace('/', '')
-        return URL.build(scheme="https", host="giant.gfycat.com", path=f"{gfyID}.gif").human_repr()
+        return URL.build(scheme="https", host="giant.gfycat.com", path=f"{gfyID}.gif")
 
 
 class OWPatch():
@@ -114,7 +114,7 @@ class OWPatch():
         return f"OWPatch: v{self.ver}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}"
 
     @staticmethod
-    def fromURL(inURL: str='https://playoverwatch.com/en-us/news/patch-notes/pc') -> typing.List:
+    def fromURL(inURL: typing.Union[str, URL]=URL('https://playoverwatch.com/en-us/news/patch-notes/pc')) -> typing.List:
         """
         Return a list of OWPatch objects from Blizzard's Patch Notes
         """
@@ -127,7 +127,7 @@ class OWPatch():
         return OWPatch._parseOWpatchHTML(r)
 
     @staticmethod
-    async def asyncfromURL(inURL: str='https://playoverwatch.com/en-us/news/patch-notes/pc') -> typing.List:
+    async def asyncfromURL(inURL: typing.Union[str, URL]=URL('https://playoverwatch.com/en-us/news/patch-notes/pc')) -> typing.List:
         """
         This function is a coroutine
 
@@ -183,9 +183,22 @@ class OWPatch():
             else:
                 patchbanner = None
 
-            patchobjs.append(OWPatch(patchref, ver, patchdate, PatchNotesParser.getblizztrack(patchref_num), patchbanner))
+            patchobjs.append(OWPatch(patchref, ver, patchdate, OWPatch.getblizztrack(patchref_num), patchbanner))
         
         return patchobjs
+
+    @staticmethod
+    def getblizztrack(patchref: str=None) -> URL:
+        """
+        Return BlizzTrack URL to patch notes, built using Blizzard's patchref
+        
+        e.g. https://blizztrack.com/patch_notes/overwatch/50148
+        """
+        if not patchref:
+            raise ValueError('No patch reference provided')
+
+        baseURL = URL('https://blizztrack.com/patch_notes/overwatch/')
+        return baseURL / patchref
 
 
 class PatchNotesParser:
@@ -240,19 +253,9 @@ class PatchNotesParser:
             self.postedpatches.append(patch.ver)
         
         self.saveposted()
-    
-    @staticmethod
-    def getblizztrack(patchref:str) -> URL:
-        """
-        Return BlizzTrack URL to patch notes, built using Blizzard's patchref
-        
-        e.g. https://blizztrack.com/patch_notes/overwatch/50148
-        """
-        baseURL = URL('https://blizztrack.com/patch_notes/overwatch/')
-        return baseURL / patchref
 
 
-async def patchchecktimer(client, sleepseconds=3600):
+async def patchchecktimer(client, sleepseconds: int=3600):
     await client.wait_until_ready()
     parsers = (PatchGifParser(client), PatchNotesParser(client))
     while not client.is_closed():
@@ -260,6 +263,7 @@ async def patchchecktimer(client, sleepseconds=3600):
             await p.patchcheck()
             
         await asyncio.sleep(sleepseconds)
+
 
 class OverwatchCommands:
     def __init__(self, bot):

@@ -40,17 +40,6 @@ Parser Reference
         #. Check patch references against those previously posted
         #. If new patch(es): Build embed, post to channel, and save the patch reference(s) to the local JSON log
 
-    .. staticmethod:: getblizztrack(patchref:str) -> yarl.URL
-
-        Build a ``yarl.URL`` object from a patch reference ID
-
-        .. code-block:: python3
-
-            >>> from cogs import overwatch
-            >>> patchURL = overwatch.PatchNotesParser.getblizztrack('50148')
-            >>> print(patchURL)
-            https://blizztrack.com/patch_notes/overwatch/50148
-
 .. class:: overwatch.PatchNotesParser
 
     Reddit user `/u/itsjieyang <https://reddit.com/u/itsjieyang>`_'s Overwatch Patch GIF Monitor
@@ -59,7 +48,7 @@ Parser Reference
 
         Discord bot instance
 
-    .. attribute:: postjsonURL(yar.URL)
+    .. attribute:: postjsonURL(yarl.URL)
 
         Reddit's JSON URL for /u/itsjieyang's submissions
 
@@ -87,7 +76,7 @@ Parser Reference
         #. Check Gfycat URLs against those previously posted
         #. If new patch GIF(s): Build embed, post to channel, and save the Gfycat permalink to the local JSON log
 
-    .. staticmethod:: gfygif(inURL: str) -> str
+    .. staticmethod:: gfygif(inURL: typing.Union[str, yarl.URL]) -> yarl.URL
 
         Build a direct GIF link from a Gfycat URL
 
@@ -155,3 +144,14 @@ Class Reference
     .. attribute:: bannerURL(yarl.URL)
 
         Blizzard patch banner URL permalink
+
+    .. staticmethod:: getblizztrack(patchref:str) -> yarl.URL
+
+        Build a ``yarl.URL`` object from a patch reference ID
+
+        .. code-block:: python3
+
+            >>> from cogs import overwatch
+            >>> patchURL = overwatch.PatchNotesParser.getblizztrack('50148')
+            >>> print(patchURL)
+            https://blizztrack.com/patch_notes/overwatch/50148
