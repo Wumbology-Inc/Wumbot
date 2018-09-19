@@ -8,9 +8,6 @@ Parser Reference
 
     Official Capcom Monster Hunter World announcements monitor
 
-    .. note::
-        Posts with "Status Update" in the title are excluded
-
     .. attribute:: bot(WumbotClient)
 
         Discord bot instance

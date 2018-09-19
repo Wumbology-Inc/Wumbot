@@ -74,8 +74,6 @@ class MHWNewsParser:
     async def getofficialnews(self, appID: int=None) -> typing.List:
         """
         Return a list of SteamNewsPost objects containing official Capcom announcements
-
-        Posts with "Status Update" in the title are excluded
         """
         appID = appID if appID is not None else self.appID
 
@@ -139,8 +137,8 @@ class MHWNewsParser:
 
         if item.author != officialaccount:
             return False
-
-        return "status update" not in item.title.lower()
+        else:
+            return True
 
 async def patchchecktimer(client, sleepseconds=3600):
     await client.wait_until_ready()
