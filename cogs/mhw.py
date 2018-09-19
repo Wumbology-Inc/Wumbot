@@ -44,9 +44,7 @@ class SteamNewsPost:
         
         if rawdict['appnews'] and rawdict['appnews']['newsitems']:
             return [SteamNewsPost(**item) for item in rawdict['appnews']['newsitems']]
-        else:
-            return None
-        
+
     @staticmethod
     async def asyncgetnewsforapp(appID: int=582010, count: int=10, maxlength: int=300, 
                                  format: str='json', **kwargs) -> typing.List:
@@ -59,8 +57,6 @@ class SteamNewsPost:
         
         if rawdict['appnews'] and rawdict['appnews']['newsitems']:
             return [SteamNewsPost(**item) for item in rawdict['appnews']['newsitems']]
-        else:
-            return None
 
 class MHWNewsParser:
     def __init__(self, bot):
@@ -78,8 +74,10 @@ class MHWNewsParser:
         appID = appID if appID is not None else self.appID
 
         news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=500)
+        logging.info(f"{len(news)} MHW news posts returned by Reddit's API")
         officialnews = [item for item in news if self.MHWnewsfilter(item, self.officialaccount)]
 
+        logging.info(f"Found {len(officialnews)} new official MHW news posts")
         return officialnews
 
     async def postpatchnotes(self, postobj: SteamNewsPost=None, channelID: int=None):
@@ -105,10 +103,18 @@ class MHWNewsParser:
 
     def loadposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
-        
+
         if logJSONpath.exists():
             with logJSONpath.open(mode='r') as fID:
-                self.postedMHWnews = [URL(urlstr) for urlstr in json.load(fID)]
+                savednewsposts = [URL(urlstr) for urlstr in json.load(fID)]
+            
+            if savednewsposts:
+                self.postedMHWnews = savednewsposts
+                logging.info(f"Loaded {len(self.postedMHWnews)} MHW news post(s) from '{logJSONpath}'")
+            else:
+                logging.info(f"No posted MHW news posts found in JSON log")
+        else:
+            logging.info(f"MHW news post JSON log does not yet exist")
 
     def saveposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
@@ -116,8 +122,12 @@ class MHWNewsParser:
         if self.postedMHWnews:
             with logJSONpath.open(mode='w') as fID:
                 json.dump([str(url) for url in self.postedMHWnews], fID)
+                logging.info(f"Saved {len(self.postedpatches)} MHW news post(s)")
+        else:
+            logging.info("No MHW news posts to save")
 
     async def patchcheck(self):
+        logging.info("MHW News check coroutine invoked")
         self.loadposted()
 
         posts = await self.getofficialnews()

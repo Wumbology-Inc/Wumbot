@@ -31,13 +31,15 @@ class PatchGifParser:
         """
         jsonURL = jsonURL if jsonURL is not None else self.postjsonURL
         postobjs = await RedditPost.asyncfromJSON(jsonURL)
-        
+        logging.info(f"Found {len(postobjs)} OW GIF post(s)")
+
         patchposts = []
         for postobj in postobjs:
             # So far, patch notes GIFs we want are from /r/Overwatch and start with "patch"
             if postobj.subreddit == 'Overwatch' and 'patch' in postobj.title.lower():
                 patchposts.append(postobj)
 
+        logging.info(f"Found {len(patchposts)} OW Patch GIF post(s)")
         return patchposts
 
     async def postpatchgif(self, postobj: RedditPost=None, channelID: int=None):
@@ -64,7 +66,15 @@ class PatchGifParser:
         
         if logJSONpath.exists():
             with logJSONpath.open(mode='r') as fID:
-                self.postedGIFs = json.load(fID)
+                savedGIFs = json.load(fID)
+            
+            if savedGIFs:
+                self.postedGIFs = savedGIFs
+                logging.info(f"Loaded {len(self.postedGIFs)} OW GIF(s) from '{logJSONpath}'")
+            else:
+                logging.info(f"No posted OW GIFs found in JSON log")
+        else:
+            logging.info(f"OW GIF log JSON does not yet exist")
 
     def saveposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
@@ -72,12 +82,17 @@ class PatchGifParser:
         if self.postedGIFs:
             with logJSONpath.open(mode='w') as fID:
                 json.dump(self.postedGIFs, fID)
+            logging.info(f"Saved {len(self.postedGIFs)} OW GIF URL(s)")
+        else:
+            logging.info("No OW GIFs to save")
 
     async def patchcheck(self):
+        logging.info("OW patch GIF check coroutine invoked")
         self.loadposted()
 
         posts = await self.getpatchgifs()
         newposts = [post for post in posts if post.contentURL not in self.postedGIFs]
+        logging.info(f"Found {len(newposts)} new GIF(s) to post")
         for post in reversed(newposts):  # Attempt to get close to posting in chronological order
             await self.postpatchgif(post)
             self.postedGIFs.append(post.contentURL.human_repr())
@@ -234,7 +249,15 @@ class PatchNotesParser:
 
         if logJSONpath.exists():
             with logJSONpath.open(mode='r') as fID:
-                self.postedpatches = json.load(fID)
+                savedpatches = json.load(fID)
+            
+            if savedpatchess:
+                self.postedpatches = savedpatches
+                logging.info(f"Loaded {len(self.postedpatches)} OW patch(es) from '{logJSONpath}'")
+            else:
+                logging.info(f"No posted OW patch(es) found in JSON log")
+        else:
+            logging.info(f"OW patch log JSON does not yet exist")
 
     def saveposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
@@ -242,12 +265,17 @@ class PatchNotesParser:
         if self.postedpatches:
             with logJSONpath.open(mode='w') as fID:
                 json.dump(self.postedpatches, fID)
+                logging.info(f"Saved {len(self.postedpatches)} OW patch(es)")
+        else:
+            logging.info("No OW patches to save")
 
     async def patchcheck(self):
+        logging.info("OW Patch check coroutine invoked")
         self.loadposted()
 
         patches = await OWPatch.asyncfromURL(self.patchesURL)
         newpatches = [patch for patch in patches if patch.ver not in self.postedpatches]
+        logging.info(f"Found {len(newpatches)} new OW patch(es) to post")
         for patch in reversed(newpatches):  # Attempt to get close to posting in chronological order
             await self.postpatchnotes(patch)
             self.postedpatches.append(patch.ver)
