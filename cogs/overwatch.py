@@ -31,7 +31,7 @@ class PatchGifParser:
         """
         jsonURL = jsonURL if jsonURL is not None else self.postjsonURL
         postobjs = await RedditPost.asyncfromJSON(jsonURL)
-        logging.info(f"Found {len(postobjs)} OW GIF post(s)")
+        logging.info(f"Found {len(postobjs)} submission(s) by /u/itsjieyang")
 
         patchposts = []
         for postobj in postobjs:

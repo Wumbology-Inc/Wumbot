@@ -122,7 +122,7 @@ class MHWNewsParser:
         if self.postedMHWnews:
             with logJSONpath.open(mode='w') as fID:
                 json.dump([str(url) for url in self.postedMHWnews], fID)
-                logging.info(f"Saved {len(self.postedpatches)} MHW news post(s)")
+                logging.info(f"Saved {len(self.postedMHWnews)} MHW news post(s)")
         else:
             logging.info("No MHW news posts to save")
 
