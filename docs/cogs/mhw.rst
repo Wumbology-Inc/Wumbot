@@ -8,9 +8,6 @@ Parser Reference
 
     Official Capcom Monster Hunter World announcements monitor
 
-    .. note::
-        Posts with "Status Update" in the title are excluded
-
     .. attribute:: bot(WumbotClient)
 
         Discord bot instance
@@ -23,11 +20,11 @@ Parser Reference
 
         Path to JSON storage file
 
-    .. attribute:: postedMHWnews(List[str])
+    .. attribute:: postedMHWnews(List[yarl.URL])
 
         ``List`` containing posted news posts
 
-        Patches are stored as Steam news permalinks, as ``str`` (e.g. ``'https://steamcommunity.com/games/582010/announcements/detail/1689302358462352379'``)
+        Patches are stored as Steam news permalinks, as ``yarl.URL`` (e.g. ``[URL('https://steamcommunity.com/games/582010/announcements/detail/1689302358462352379')]``)
 
     .. attribute:: appID(int)
 
@@ -37,9 +34,8 @@ Parser Reference
 
         Official account name
 
-    .. classmethod:: patchcheck
-
-        *This function is a coroutine*
+    .. comethod:: patchcheck
+        :classmethod:
 
         Executes the patch check operations:
 
@@ -48,9 +44,7 @@ Parser Reference
         #. Check news URLs against those previously posted
         #. If new news post(s): Build embed, post to channel, and save the Steam news permalink to the local JSON log
 
-.. function:: patchchecktimer(client: WumbotClient, sleepseconds: int=3600)
-
-    This function is a *coroutine*
+.. cofunction:: patchchecktimer(client: WumbotClient, sleepseconds: int=3600)
 
     Asynchronous patch checking loop for use with Discord.py's event loop
 
@@ -135,9 +129,8 @@ Class Reference
             Additional ``**kwargs`` are discarded
 
 
-    .. staticmethod:: asyncgetnewsforapp(appID: int=582010, count: int=10, maxlength: int=300, format: str='json', **kwargs) -> typing.List
-
-        This function is a *coroutine*
+    .. comethod:: asyncgetnewsforapp(appID: int=582010, count: int=10, maxlength: int=300, format: str='json', **kwargs) -> typing.List
+        :staticmethod:
 
         Return a list of ``mhw.SteamNewsPost`` objects for the specified ``appID``
 

@@ -32,7 +32,7 @@ class RedditPost:
         return f"{self.title}: {self.permalink}"
 
     @staticmethod
-    def fromJSON(jsonURL: str=None) -> typing.List:
+    def fromJSON(jsonURL: typing.Union[str, URL]=None) -> typing.List:
         """
         Return a list of RedditPost from an input Reddit JSON URL
 
@@ -67,7 +67,7 @@ class RedditPost:
         return [RedditPost(post) for post in postlist]
     
     @staticmethod
-    def fromURL(inURL: str=None) -> typing.List:
+    def fromURL(inURL: typing.Union[str, URL]=None) -> typing.List:
         """
         Return a list of RedditPost objects from an input Reddit URL
 
@@ -91,7 +91,7 @@ class RedditPost:
             return RedditPost.fromJSON(inURL.join(URL('.json')))
 
     @staticmethod
-    async def asyncfromJSON(jsonURL: str=None) -> typing.List:
+    async def asyncfromJSON(jsonURL: typing.Union[str, URL]=None) -> typing.List:
         """
         This function is a coroutine
 

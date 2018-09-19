@@ -20,24 +20,26 @@ from .reddit import RedditPost
 class PatchGifParser:
     def __init__(self, bot):
         self.bot = bot
-        self.postjsonURL = "https://www.reddit.com/user/itsjieyang/submitted.json"
+        self.postjsonURL = URL("https://www.reddit.com/user/itsjieyang/submitted.json")
         self.postchannelID = 477916849879908386
         self.logJSONpath = Path('./log/postedGIFs.JSON')
         self.postedGIFs = []
 
-    async def getpatchgifs(self, jsonURL: str=None):
+    async def getpatchgifs(self, jsonURL: URL=None):
         """
         Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
         """
         jsonURL = jsonURL if jsonURL is not None else self.postjsonURL
         postobjs = await RedditPost.asyncfromJSON(jsonURL)
-        
+        logging.info(f"Found {len(postobjs)} OW GIF post(s)")
+
         patchposts = []
         for postobj in postobjs:
             # So far, patch notes GIFs we want are from /r/Overwatch and start with "patch"
             if postobj.subreddit == 'Overwatch' and 'patch' in postobj.title.lower():
                 patchposts.append(postobj)
 
+        logging.info(f"Found {len(patchposts)} OW Patch GIF post(s)")
         return patchposts
 
     async def postpatchgif(self, postobj: RedditPost=None, channelID: int=None):
@@ -64,7 +66,15 @@ class PatchGifParser:
         
         if logJSONpath.exists():
             with logJSONpath.open(mode='r') as fID:
-                self.postedGIFs = json.load(fID)
+                savedGIFs = json.load(fID)
+            
+            if savedGIFs:
+                self.postedGIFs = savedGIFs
+                logging.info(f"Loaded {len(self.postedGIFs)} OW GIF(s) from '{logJSONpath}'")
+            else:
+                logging.info(f"No posted OW GIFs found in JSON log")
+        else:
+            logging.info(f"OW GIF log JSON does not yet exist")
 
     def saveposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
@@ -72,20 +82,25 @@ class PatchGifParser:
         if self.postedGIFs:
             with logJSONpath.open(mode='w') as fID:
                 json.dump(self.postedGIFs, fID)
+            logging.info(f"Saved {len(self.postedGIFs)} OW GIF URL(s)")
+        else:
+            logging.info("No OW GIFs to save")
 
     async def patchcheck(self):
+        logging.info("OW patch GIF check coroutine invoked")
         self.loadposted()
 
         posts = await self.getpatchgifs()
         newposts = [post for post in posts if post.contentURL not in self.postedGIFs]
+        logging.info(f"Found {len(newposts)} new GIF(s) to post")
         for post in reversed(newposts):  # Attempt to get close to posting in chronological order
             await self.postpatchgif(post)
-            self.postedGIFs.append(post.contentURL)
+            self.postedGIFs.append(post.contentURL.human_repr())
         
         self.saveposted()
 
     @staticmethod
-    def gfygif(inURL: str):
+    def gfygif(inURL: typing.Union[str, URL]) -> URL:
         """
         Build a direct gif link from a gfycat URL
 
@@ -94,7 +109,7 @@ class PatchGifParser:
         Returns a string
         """
         gfyID = URL(inURL).path.replace('/', '')
-        return URL.build(scheme="https", host="giant.gfycat.com", path=f"{gfyID}.gif").human_repr()
+        return URL.build(scheme="https", host="giant.gfycat.com", path=f"{gfyID}.gif")
 
 
 class OWPatch():
@@ -114,7 +129,7 @@ class OWPatch():
         return f"OWPatch: v{self.ver}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}"
 
     @staticmethod
-    def fromURL(inURL: str='https://playoverwatch.com/en-us/news/patch-notes/pc') -> typing.List:
+    def fromURL(inURL: typing.Union[str, URL]=URL('https://playoverwatch.com/en-us/news/patch-notes/pc')) -> typing.List:
         """
         Return a list of OWPatch objects from Blizzard's Patch Notes
         """
@@ -127,7 +142,7 @@ class OWPatch():
         return OWPatch._parseOWpatchHTML(r)
 
     @staticmethod
-    async def asyncfromURL(inURL: str='https://playoverwatch.com/en-us/news/patch-notes/pc') -> typing.List:
+    async def asyncfromURL(inURL: typing.Union[str, URL]=URL('https://playoverwatch.com/en-us/news/patch-notes/pc')) -> typing.List:
         """
         This function is a coroutine
 
@@ -183,9 +198,22 @@ class OWPatch():
             else:
                 patchbanner = None
 
-            patchobjs.append(OWPatch(patchref, ver, patchdate, PatchNotesParser.getblizztrack(patchref_num), patchbanner))
+            patchobjs.append(OWPatch(patchref, ver, patchdate, OWPatch.getblizztrack(patchref_num), patchbanner))
         
         return patchobjs
+
+    @staticmethod
+    def getblizztrack(patchref: str=None) -> URL:
+        """
+        Return BlizzTrack URL to patch notes, built using Blizzard's patchref
+        
+        e.g. https://blizztrack.com/patch_notes/overwatch/50148
+        """
+        if not patchref:
+            raise ValueError('No patch reference provided')
+
+        baseURL = URL('https://blizztrack.com/patch_notes/overwatch/')
+        return baseURL / patchref
 
 
 class PatchNotesParser:
@@ -221,7 +249,15 @@ class PatchNotesParser:
 
         if logJSONpath.exists():
             with logJSONpath.open(mode='r') as fID:
-                self.postedpatches = json.load(fID)
+                savedpatches = json.load(fID)
+            
+            if savedpatchess:
+                self.postedpatches = savedpatches
+                logging.info(f"Loaded {len(self.postedpatches)} OW patch(es) from '{logJSONpath}'")
+            else:
+                logging.info(f"No posted OW patch(es) found in JSON log")
+        else:
+            logging.info(f"OW patch log JSON does not yet exist")
 
     def saveposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
@@ -229,30 +265,25 @@ class PatchNotesParser:
         if self.postedpatches:
             with logJSONpath.open(mode='w') as fID:
                 json.dump(self.postedpatches, fID)
+                logging.info(f"Saved {len(self.postedpatches)} OW patch(es)")
+        else:
+            logging.info("No OW patches to save")
 
     async def patchcheck(self):
+        logging.info("OW Patch check coroutine invoked")
         self.loadposted()
 
         patches = await OWPatch.asyncfromURL(self.patchesURL)
         newpatches = [patch for patch in patches if patch.ver not in self.postedpatches]
+        logging.info(f"Found {len(newpatches)} new OW patch(es) to post")
         for patch in reversed(newpatches):  # Attempt to get close to posting in chronological order
             await self.postpatchnotes(patch)
             self.postedpatches.append(patch.ver)
         
         self.saveposted()
-    
-    @staticmethod
-    def getblizztrack(patchref:str) -> URL:
-        """
-        Return BlizzTrack URL to patch notes, built using Blizzard's patchref
-        
-        e.g. https://blizztrack.com/patch_notes/overwatch/50148
-        """
-        baseURL = URL('https://blizztrack.com/patch_notes/overwatch/')
-        return baseURL / patchref
 
 
-async def patchchecktimer(client, sleepseconds=3600):
+async def patchchecktimer(client, sleepseconds: int=3600):
     await client.wait_until_ready()
     parsers = (PatchGifParser(client), PatchNotesParser(client))
     while not client.is_closed():
@@ -260,6 +291,7 @@ async def patchchecktimer(client, sleepseconds=3600):
             await p.patchcheck()
             
         await asyncio.sleep(sleepseconds)
+
 
 class OverwatchCommands:
     def __init__(self, bot):
