@@ -89,9 +89,8 @@ Class Reference
 
         Other input URL formats are not supported
 
-    .. staticmethod:: asyncfromURL(inURL: str=None) -> typing.List:
-
-        *This function is a coroutine*
+    .. comethod:: asyncfromURL(inURL: str=None) -> typing.List:
+        :staticmethod:
 
         Return a list of ``reddit.RedditPost`` objects from an input Reddit URL
 

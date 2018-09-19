@@ -12,7 +12,7 @@ Parser Reference
 
         Discord bot instance
 
-    .. attribute:: patchesURL(yar.URL)
+    .. attribute:: patchesURL(yarl.URL)
 
         Blizzard Patch Notes URL
 
@@ -30,9 +30,8 @@ Parser Reference
 
         Patches are stored as patch reference IDs, as ``str`` (e.g. ``'50148'``)
 
-    .. classmethod:: patchcheck
-
-        *This function is a coroutine*
+    .. comethod:: patchcheck
+        :classmethod:
 
         Executes the patch check operations:
 
@@ -78,9 +77,8 @@ Parser Reference
 
         Patches are stored as Gfycat permalinks, as ``str`` (e.g. ``'https://gfycat.com/MajorDiligentIbizanhound'``)
 
-    .. classmethod:: patchcheck
-
-        *This function is a coroutine*
+    .. comethod:: patchcheck
+        :classmethod:
 
         Executes the patch check operations:
 
@@ -100,9 +98,7 @@ Parser Reference
             >>> print(gif)
             https://giant.gfycat.com/MajorDiligentIbizanhound.gif
 
-.. function:: patchchecktimer(client: WumbotClient, sleepseconds: int=3600)
-
-    This function is a *coroutine*
+.. cofunction:: patchchecktimer(client: WumbotClient, sleepseconds: int=3600)
 
     Asynchronous patch checking loop for use with Discord.py's event loop
 
@@ -156,6 +152,6 @@ Class Reference
 
         Patch note permalink is provided by `BlizzTrack <https://blizztrack.com/patch_notes/overwatch/latest>`_
 
-    .. attribute:: bannerURL(yar.URL)
+    .. attribute:: bannerURL(yarl.URL)
 
         Blizzard patch banner URL permalink
