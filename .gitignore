@@ -14,3 +14,6 @@ __pycache__/
 
 # Logs
 *.log
+
+# Docs build
+docs/_build/
