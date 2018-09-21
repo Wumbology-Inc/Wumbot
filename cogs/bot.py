@@ -1,4 +1,5 @@
 import logging
+import string
 from datetime import datetime
 
 import discord
@@ -9,6 +10,8 @@ from discord.ext import commands
 class MainCommands():
     def __init__(self, bot):
         self.bot = bot
+
+        self._lettermap = self._buildletterunicode()
 
     @commands.command()
     async def ver(self, ctx: commands.Context):
@@ -49,6 +52,66 @@ class MainCommands():
         else:
             logging.info(f'Unauthorized kill attempt by {ctx.message.author}')
             await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
+
+    @commands.command()
+    async def reactmessage(self, ctx: commands.Context, *args):
+        """
+        Add reaction message to a message ID
+
+        e.g. ~reactmessage 492366085232787467 YOLO
+        """
+        # Assume last entry in args is the message ID and concatenate everything else into the message
+        messageID = int(args[0])
+        reactmessage = ''.join(args[1::]).replace(' ', '').upper()  # Remove spaces & normalize to lowercase
+
+        if len(reactmessage) == 0:
+            await ctx.send("Command must be invoked with both a message aend a message ID")
+            return
+
+        if not reactmessage.isalpha():
+            await ctx.send("Reaction message must only contain alphabetic characters")
+            return
+
+        if len(reactmessage) != len(set(reactmessage.lower())):
+            await ctx.send("Reaction message cannot contain duplicate letters")
+            return
+
+        messageObj = None
+        for channel in self.bot.get_all_channels():
+            if isinstance(channel, discord.TextChannel):
+                try:
+                    messageObj = await channel.get_message(messageID)
+                except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                    continue
+                finally:
+                    if not messageObj:
+                        await ctx.send(f"Message ID '{messageID}' could not be obtained")
+
+        for letter in reactmessage:
+            await messageObj.add_reaction(self._lettermap[letter])
+
+    @staticmethod
+    def _buildletterunicode():
+        """
+        Return a dictionary mapping of alphabetical characters to their
+        Unicode Regional Indicator Symbol Equivalent (1F1E6..1F1FF)
+
+        See: 
+            https://en.wikipedia.org/wiki/Regional_Indicator_Symbol
+            https://www.unicode.org/charts/PDF/U1F100.pdf
+        """
+        # # Offset alphabetic letter index & convert to base 16
+        # a = [(n + 5) % 16 for n in range(1, 27)]
+        # hexes = [hex(n)[2::].upper() for n in a]
+
+        # suffix = ['E']*10 + ['F']*16
+        # unicodez = [f"\\u1F1{x}{y}" for x,y in zip(suffix, hexes)]
+
+        # return {letter:unicode for letter, unicode in zip(string.ascii_uppercase, unicodez)}
+
+        # Map using ord and the unicode code point rather than the above
+        return {letter:chr(ID) for letter, ID in zip(string.ascii_uppercase, range(127462, 127488))}
+
 
 class Helpers:
     @staticmethod
