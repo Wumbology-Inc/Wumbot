@@ -71,7 +71,9 @@ class MainCommands():
             pass
         reactmessage = ''.join(args[1::]).replace(' ', '').upper()  # Remove spaces & normalize to lowercase
 
-        if len(reactmessage) == 0:
+        if not Helpers.isWumbologist(ctx.message.author):
+            feedbackmsg = await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
+        elif len(reactmessage) == 0:
             feedbackmsg = await ctx.send("Command must be invoked with both a message and a message ID")
         elif not reactmessage.isalpha():
             feedbackmsg = await ctx.send("Reaction message must only contain alphabetic characters")
@@ -138,7 +140,7 @@ class MainCommands():
 
 class Helpers:
     @staticmethod
-    def isOwner(user: discord.User):
+    def isOwner(user: discord.User) -> bool:
         """
         Check to see if the input User's ID matches the Owner ID
         """
@@ -146,13 +148,19 @@ class Helpers:
         return user.id == ownerID
     
     @staticmethod
-    def isDM(channel: discord.TextChannel):
+    def isDM(channel: discord.TextChannel) -> bool:
         """
         Check to see if a channel is a DM
 
         A DM is either an instance of DMChannel or GroupChannel
         """
         return isinstance(channel, (discord.DMChannel, discord.GroupChannel))
+
+    def isWumbologist(member: discord.Member) -> bool:
+        """
+        Check to see if a discord.Member has the 'Wumbologists' role
+        """
+        return 'Wumbologists' in [str(role) for role in member.roles]
 
 
 def setup(bot):
