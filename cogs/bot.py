@@ -59,7 +59,7 @@ class MainCommands():
         """
         Add reaction message to a message ID
 
-        e.g. ~reactmessage 492366085232787467 YOLO
+        e.g. ~reactmessage 492366085232787467 Hype
 
         Command and any feedback are deleted after selfdestructdelay seconds
         """
