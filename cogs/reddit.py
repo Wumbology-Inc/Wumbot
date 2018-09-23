@@ -25,8 +25,8 @@ class RedditPost:
         self.subreddit = inJSON['data']['subreddit']
         self.title = inJSON['data']['title']
         self.createdUTC = datetime.utcfromtimestamp(inJSON['data']['created_utc'])
-        self.contentURL = inJSON['data']['url']
-        self.permalink = f"https://www.reddit.com{inJSON['data']['permalink']}"
+        self.contentURL = URL(inJSON['data']['url'])
+        self.permalink = URL(f"https://www.reddit.com{inJSON['data']['permalink']}")
         
     def __repr__(self):
         return f"{self.title}: {self.permalink}"
