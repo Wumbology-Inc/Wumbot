@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import string
 from datetime import datetime
@@ -54,41 +55,63 @@ class MainCommands():
             await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
 
     @commands.command()
-    async def reactmessage(self, ctx: commands.Context, *args):
+    async def reactmessage(self, ctx: commands.Context, *args, selfdestructdelay: int=10):
         """
         Add reaction message to a message ID
 
         e.g. ~reactmessage 492366085232787467 YOLO
+
+        Command and any feedback are deleted after selfdestructdelay seconds
         """
         # Assume last entry in args is the message ID and concatenate everything else into the message
-        messageID = int(args[0])
+        continueflag = False
+        try:
+            messageID = int(args[0])
+        except ValueError:
+            pass
         reactmessage = ''.join(args[1::]).replace(' ', '').upper()  # Remove spaces & normalize to lowercase
 
         if len(reactmessage) == 0:
-            await ctx.send("Command must be invoked with both a message aend a message ID")
+            feedbackmsg = await ctx.send("Command must be invoked with both a message and a message ID")
+        elif not reactmessage.isalpha():
+            feedbackmsg = await ctx.send("Reaction message must only contain alphabetic characters")
+        elif len(reactmessage) != len(set(reactmessage.lower())):
+            feedbackmsg = await ctx.send("Reaction message cannot contain duplicate letters")
+        else:
+            continueflag = True
+
+        if not continueflag:
+            await asyncio.sleep(selfdestructdelay)
+            await ctx.message.delete()
+            await feedbackmsg.delete()
             return
 
-        if not reactmessage.isalpha():
-            await ctx.send("Reaction message must only contain alphabetic characters")
-            return
-
-        if len(reactmessage) != len(set(reactmessage.lower())):
-            await ctx.send("Reaction message cannot contain duplicate letters")
-            return
-
+        continueflag = False
         messageObj = None
         for channel in self.bot.get_all_channels():
             if isinstance(channel, discord.TextChannel):
                 try:
+                    foundchannel = channel
                     messageObj = await channel.get_message(messageID)
+                    continueflag = True
                 except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                     continue
                 finally:
                     if not messageObj:
-                        await ctx.send(f"Message ID '{messageID}' could not be obtained")
+                        feedbackmsg = await ctx.send(f"Message ID '{messageID}' could not be obtained")
+        
+        if continueflag:
+            async with foundchannel.typing():
+                for letter in reactmessage:
+                    await messageObj.add_reaction(self._lettermap[letter])
+                    await asyncio.sleep(selfdestructdelay)
+        else:
+            await asyncio.sleep(selfdestructdelay)
+            await ctx.message.delete()
+            await feedbackmsg.delete()
 
-        for letter in reactmessage:
-            await messageObj.add_reaction(self._lettermap[letter])
+        await ctx.message.delete()
+
 
     @staticmethod
     def _buildletterunicode():
