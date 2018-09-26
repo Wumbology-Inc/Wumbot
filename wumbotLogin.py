@@ -27,14 +27,14 @@ class WumbotClient(commands.Bot):
         logging.info(f'Logged in as {self.user}')
         print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
 
-def loadCredentials(credentialJSON):
+def loadCredentials(credentialJSON) -> str:
     """
     Load login credentials from the input JSON file
     """
     with open(credentialJSON, mode='r') as fID:
         credentials = json.load(fID)
 
-    return credentials
+    return credentials['DiscordToken']
 
 credentialpath = './credentials.JSON'
 credentials = loadCredentials(credentialpath)
@@ -53,7 +53,7 @@ if credentials:
     client.loop.create_task(mhw.patchchecktimer(client))
 
     # Finally, try to log in
-    client.run(credentials['DiscordToken'])
+    client.run(credentials)
 else:
     logging.info(f"Credential file empty: {credentialpath}")
     raise EnvironmentError
