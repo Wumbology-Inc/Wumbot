@@ -41,16 +41,46 @@ class RedditPost:
         return RedditPost(**inJSON['data'])
 
     @staticmethod
-    def fromPraw(inSubmission: praw.Submission) -> RedditPost:
+    def fromPRAW(inSub: praw.Submission) -> RedditPost:
         """
-        Generate RedditPost from a Praw Submission
+        Generate RedditPost from a PRAW Submission
         """
-        raise NotImplementedError
+        # Because PRAW does lazy objects, only pull the desired attributes
+        submissiondict = {'subreddit': inSub.subreddit, 'id': inSub.id,
+                          'created_utc': inSub.created_utc, 'title': inSub.title,
+                          'url': inSub.url, 'permalink': inSub.permalink,
+                          'author': inSub.author
+                          }
+        return RedditPost(**submissiondict)
 
 
 class RedditPRAW:
-    def __init__():
-        raise NotImplementedError
+    def __init__(self, credentialJSON: Path=Path('./credentials.JSON')):
+        credentials = RedditPRAW._loadCredentials(credentialJSON)
+        self.session = praw.Reddit(client_id=credentials[0], client_secret=credentials[1],
+                                user_agent='Wumbot PRAW Agent')
+        
+        # Try to get some submissions to check for correct authentication
+        self.isauthenticated = True
+        try:
+            _ = self.session.subreddit('python').hot(limit=1)
+        except praw.exceptions.ResponseException as e:
+            self.isauthenticated = False
+
+        if self.isauthenticated:
+            logging.info("Successful PRAW authentication")
+        else:
+            logging.info(f"PRAW received invalid credentials from '{credentialJSON}'")
+
+    @staticmethod
+    def _loadCredentials(credentialJSON: Path) -> str:
+        """
+        Load login credentials from the input JSON file
+        """
+        with open(credentialJSON, mode='r') as fID:
+            credentials = json.load(fID)
+
+        return credentials['RedditOAuth']
 
 
 class RedditJSON():
