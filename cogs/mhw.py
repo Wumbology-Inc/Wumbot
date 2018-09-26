@@ -74,7 +74,7 @@ class MHWNewsParser:
         appID = appID if appID is not None else self.appID
 
         news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=500)
-        logging.info(f"{len(news)} MHW news posts returned by Reddit's API")
+        logging.info(f"{len(news)} MHW news posts returned by Steam's API")
         officialnews = [item for item in news if self.MHWnewsfilter(item, self.officialaccount)]
 
         logging.info(f"Found {len(officialnews)} new official MHW news posts")
