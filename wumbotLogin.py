@@ -53,7 +53,7 @@ if credentials:
     client.loop.create_task(mhw.patchchecktimer(client))
 
     # Finally, try to log in
-    client.run(credentials['TOKEN'])
+    client.run(credentials['DiscordToken'])
 else:
     logging.info(f"Credential file empty: {credentialpath}")
     raise EnvironmentError
