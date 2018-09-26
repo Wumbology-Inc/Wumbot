@@ -72,6 +72,18 @@ class RedditPRAW:
         else:
             logging.info(f"PRAW received invalid credentials from '{credentialJSON}'")
 
+    def getnewusersubmissions(self, username: str, limit: int=25) -> praw.models.ListingGenerator:
+        """
+        Return a ListingGenerator of username's newest Reddit submissions
+
+        API call can be limited to a number of submissions specified by limit
+        """
+        # Strip out /u/ or u/ from the username
+        exp = r"/?u/"
+        username = re.sub(exp, '', username)
+
+        return self.session.redditor(username).submissions.new(limit=limit)
+
     @staticmethod
     def _loadCredentials(credentialJSON: Path) -> str:
         """
