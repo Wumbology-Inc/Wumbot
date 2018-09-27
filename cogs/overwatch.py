@@ -72,7 +72,7 @@ class PatchGifParser:
         
         if logJSONpath.exists():
             with logJSONpath.open(mode='r') as fID:
-                savedGIFs = json.load(fID)
+                savedGIFs = [URL(gfyurl) for gfyurl in json.load(fID)]
             
             if savedGIFs:
                 self.postedGIFs = savedGIFs
@@ -256,8 +256,8 @@ class PatchNotesParser:
         if logJSONpath.exists():
             with logJSONpath.open(mode='r') as fID:
                 savedpatches = json.load(fID)
-            
-            if savedpatchess:
+
+            if savedpatches:
                 self.postedpatches = savedpatches
                 logging.info(f"Loaded {len(self.postedpatches)} OW patch(es) from '{logJSONpath}'")
             else:

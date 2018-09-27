@@ -32,7 +32,7 @@ class MHWNewsParser:
         logging.info(f"{len(news)} MHW news posts returned by Steam's API")
         officialnews = [item for item in news if self.MHWnewsfilter(item, self.officialaccount)]
 
-        logging.info(f"Found {len(officialnews)} new official MHW news posts")
+        logging.info(f"Found {len(officialnews)} official MHW news posts")
         return officialnews
 
     async def postpatchnotes(self, postobj: SteamNewsPost=None, channelID: int=None):
@@ -87,6 +87,7 @@ class MHWNewsParser:
 
         posts = await self.getofficialnews()
         newposts = [post for post in posts if post.url not in self.postedMHWnews]
+        logging.info(f"Found {len(newposts)} unposted MHW news posts")
         for post in reversed(newposts):  # Attempt to get close to posting in chronological order
             await self.postpatchnotes(post)
             self.postedMHWnews.append(post.url)
