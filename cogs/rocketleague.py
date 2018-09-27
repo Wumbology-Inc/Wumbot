@@ -32,7 +32,7 @@ class RLNewsParser:
         logging.info(f"{len(news)} RLnews posts returned by Steam's API")
         officialnews = [item for item in news if self.RLnewsfilter(item, self.psyonixstaff)]
 
-        logging.info(f"Found {len(officialnews)} new official RL news posts")
+        logging.info(f"Found {len(officialnews)} official RL news posts")
         return officialnews
 
     async def postpatchnotes(self, postobj: SteamNewsPost=None, channelID: int=None):
@@ -87,6 +87,7 @@ class RLNewsParser:
 
         posts = await self.getofficialnews()
         newposts = [post for post in posts if post.url not in self.postedRLnews]
+        logging.info(f"Found {len(newposts)} unposted RL news posts")
         for post in reversed(newposts):  # Attempt to get close to posting in chronological order
             await self.postpatchnotes(post)
             self.postedRLnews.append(post.url)

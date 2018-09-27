@@ -1,4 +1,4 @@
-FROM python:3.6-alpine
+FROM python:3.7-alpine
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache git bash
