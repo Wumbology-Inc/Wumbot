@@ -5,7 +5,7 @@ from datetime import datetime
 
 from discord.ext import commands
 
-from cogs import overwatch, mhw, wumbopresence
+from cogs import overwatch, mhw, wumbopresence, rocketleague
 
 
 # Force UTC Timestamps
@@ -46,11 +46,13 @@ if credentials:
     client.load_extension("cogs.reddit")
     client.load_extension("cogs.overwatch")
     client.load_extension("cogs.mhw")
+    client.load_extension("cogs.rocketleague")
 
     # Setup event loops
     client.loop.create_task(wumbopresence.randWumboTimer(client, wumboJSON='wumbolist.JSON'))
     client.loop.create_task(overwatch.patchchecktimer(client))
     client.loop.create_task(mhw.patchchecktimer(client))
+    client.loop.create_task(rocketleague.patchchecktimer(client))
 
     # Finally, try to log in
     client.run(credentials)
