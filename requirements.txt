@@ -3,6 +3,7 @@ docker >= 3.5
 aiohttp >= 3.3.0, < 3.5.0
 beautifulsoup4 >= 4.6.0
 requests >= 2.19.0
+praw >= 6.0
 
 # Discord.py Rewrite Branch
 git+https://github.com/Rapptz/discord.py@rewrite#egg=discord.py

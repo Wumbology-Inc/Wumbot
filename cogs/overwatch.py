@@ -14,7 +14,7 @@ from discord.ext import commands
 from yarl import URL
 
 from .bot import Helpers
-from .reddit import RedditPost
+from .reddit import RedditPost, RedditPRAW, RedditJSON
 
 
 class PatchGifParser:
@@ -30,7 +30,13 @@ class PatchGifParser:
         Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
         """
         jsonURL = jsonURL if jsonURL is not None else self.postjsonURL
-        postobjs = await RedditPost.asyncfromJSON(jsonURL)
+
+        prawinstance = RedditPRAW()
+        if prawinstance.isauthenticated:
+            postobjs = [RedditPost.fromPRAW(submission) for submission in prawinstance.getnewusersubmissions('itsjieyang')]
+        else:
+            postobjs = await RedditJSON.asyncfromJSON(jsonURL)
+
         logging.info(f"Found {len(postobjs)} submission(s) by /u/itsjieyang")
 
         patchposts = []

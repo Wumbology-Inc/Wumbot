@@ -5,7 +5,7 @@ from datetime import datetime
 
 from discord.ext import commands
 
-from cogs import overwatch, mhw, wumbopresence
+from cogs import overwatch, mhw, wumbopresence, rocketleague
 
 
 # Force UTC Timestamps
@@ -27,14 +27,14 @@ class WumbotClient(commands.Bot):
         logging.info(f'Logged in as {self.user}')
         print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
 
-def loadCredentials(credentialJSON):
+def loadCredentials(credentialJSON) -> str:
     """
     Load login credentials from the input JSON file
     """
     with open(credentialJSON, mode='r') as fID:
         credentials = json.load(fID)
 
-    return credentials
+    return credentials['DiscordToken']
 
 credentialpath = './credentials.JSON'
 credentials = loadCredentials(credentialpath)
@@ -46,14 +46,16 @@ if credentials:
     client.load_extension("cogs.reddit")
     client.load_extension("cogs.overwatch")
     client.load_extension("cogs.mhw")
+    client.load_extension("cogs.rocketleague")
 
     # Setup event loops
     client.loop.create_task(wumbopresence.randWumboTimer(client, wumboJSON='wumbolist.JSON'))
     client.loop.create_task(overwatch.patchchecktimer(client))
     client.loop.create_task(mhw.patchchecktimer(client))
+    client.loop.create_task(rocketleague.patchchecktimer(client))
 
     # Finally, try to log in
-    client.run(credentials['TOKEN'])
+    client.run(credentials)
 else:
     logging.info(f"Credential file empty: {credentialpath}")
     raise EnvironmentError
