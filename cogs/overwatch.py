@@ -87,7 +87,7 @@ class PatchGifParser:
         
         if self.postedGIFs:
             with logJSONpath.open(mode='w') as fID:
-                json.dump(self.postedGIFs, fID)
+                json.dump([str(url) for url in self.postedGIFs], fID)
             logging.info(f"Saved {len(self.postedGIFs)} OW GIF URL(s)")
         else:
             logging.info("No OW GIFs to save")
