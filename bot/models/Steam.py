@@ -1,4 +1,5 @@
 import asyncio
+import re
 import typing
 from datetime import datetime
 
@@ -18,7 +19,7 @@ class SteamNewsPost:
         self.url = URL(url)
         self.is_external_url = is_external_url
         self.author = author
-        self.contents = contents
+        self.contents = self._stripURL(contents)
         self.feedlabel = feedlabel
         self.date = datetime.fromtimestamp(date)
         self.feedname = feedname
@@ -52,3 +53,11 @@ class SteamNewsPost:
         
         if rawdict['appnews'] and rawdict['appnews']['newsitems']:
             return [SteamNewsPost(**item) for item in rawdict['appnews']['newsitems']]
+
+    @staticmethod
+    def _stripURL(instr: str) -> str:
+        """
+        Strip URLs out of instr using a basic regex
+        """
+        exp = r"https?:\/\/[\w\-\.\/]+\s?"
+        return re.sub(exp, '', instr)

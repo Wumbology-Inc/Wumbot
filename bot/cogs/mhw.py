@@ -28,7 +28,7 @@ class MHWNewsParser:
         """
         appID = appID if appID is not None else self.appID
 
-        news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=500)
+        news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=600)
         logging.info(f"{len(news)} MHW news posts returned by Steam's API")
         officialnews = [item for item in news if self.MHWnewsfilter(item, self.officialaccount)]
 

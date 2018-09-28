@@ -28,7 +28,7 @@ class RLNewsParser:
         """
         appID = appID if appID is not None else self.appID
 
-        news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=500)
+        news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=600)
         logging.info(f"{len(news)} RL news post(s) returned by Steam's API")
         officialnews = [item for item in news if self.RLnewsfilter(item, self.psyonixstaff)]
 
