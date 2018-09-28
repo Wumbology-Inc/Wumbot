@@ -5,7 +5,8 @@ from datetime import datetime
 
 from discord.ext import commands
 
-from .cogs import overwatch, mhw, wumbopresence, rocketleague
+from .cogs import mhw, overwatch, rocketleague, wumbopresence
+
 
 class WumbotClient(commands.Bot):
     def __init__(self, *args, **kwargs):

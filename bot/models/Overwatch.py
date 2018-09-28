@@ -1,6 +1,10 @@
-from bs4 import BeautifulSoup
-import requests
+import typing
+
 import aiohttp
+import requests
+from bs4 import BeautifulSoup
+from yarl import URL
+
 
 class OWPatch():
     def __init__(self, patchref: str=None, ver: str=None, patchdate: datetime=None, 

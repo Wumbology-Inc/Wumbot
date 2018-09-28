@@ -13,7 +13,11 @@ class SteamNewsPost:
                  author: str=None, contents: str=None, feedlabel: str=None, date: int=None, 
                  feedname: str=None, feed_type: int=None, appid: int=None
                  ):
-        
+        """
+        Helper object to represent a Steam news post
+
+        URLs are stripped from the contents string on instantiation
+        """
         self.gid = gid
         self.title = title
         self.url = URL(url)
@@ -32,6 +36,15 @@ class SteamNewsPost:
     @staticmethod
     async def asyncgetnewsforapp(appID: int=582010, count: int=10, maxlength: int=300, 
                                  format: str='json', **kwargs) -> typing.List:
+        """
+        This function is a coroutine
+
+        Retrieve Steam news posts for the input appID
+
+        Additional keyword arguments are accepted but not used to generate the API query
+
+        Results are returned as a list of SteamNewsPost objects
+        """
         apiURL = URL("https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/")
         
         paramdict = {'appID': appID, 'count': count, 'maxlength': maxlength, 'format': format}
@@ -45,6 +58,13 @@ class SteamNewsPost:
     @staticmethod
     def getnewsforapp(appID: int=582010, count: int=10, maxlength: int=300, 
                       format: str='json', **kwargs) -> typing.List:
+        """
+        Retrieve Steam news posts for the input appID
+
+        Additional keyword arguments are accepted but not used to generate the API query
+
+        Results are returned as a list of SteamNewsPost objects
+        """
         apiURL = URL("https://api.steampowered.com/ISteamNews/GetNewsForApp/v0002/")
         
         paramdict = {'appID': appID, 'count': count, 'maxlength': maxlength, 'format': format}

@@ -19,6 +19,9 @@ class RedditPost:
                  ):
         """
         Helper object to represent a Reddit Submission
+
+        To simplify construction from Reddit's JSON return, additional keyword arguments
+        are accepted but discarded
         """
         self.subreddit = subreddit
         self.id = id
@@ -41,7 +44,7 @@ class RedditPost:
     @staticmethod
     def fromPRAW(inSub: praw.Submission) -> RedditPost:
         """
-        Generate RedditPost from a PRAW Submission
+        Generate RedditPost from a PRAW Submission object
         """
         # Because PRAW does lazy objects, only pull the desired attributes
         submissiondict = {'subreddit': inSub.subreddit, 'id': inSub.id,
@@ -51,21 +54,20 @@ class RedditPost:
                           }
         return RedditPost(**submissiondict)
 
-    @staticmethod
-    def _stripURLs(instr: str) -> str:
-        """
-        Strip out URLs from the returned content preview. They don't render in 
-        Discord embeds so they just sit there and look bad.
-        """
-        raise NotImplementedError
-
 
 class RedditPRAW:
     def __init__(self, credentialJSON: Path=Path('./credentials.JSON')):
         credentials = RedditPRAW._loadCredentials(credentialJSON)
         self.session = praw.Reddit(client_id=credentials[0], client_secret=credentials[1],
                                 user_agent='Wumbot PRAW Agent')
-        
+        """
+        Helper class for PRAW instance
+
+        On instantiation, an attempt is made to authenticate using the input credential JSON
+        Credential JSON should contain a 'RedditOAuth' key with a (ID, secret) tuple
+
+        The isauthenticated attribute can be queried to determine authentication status
+        """
         # Try to get some submissions to check for correct authentication
         self.isauthenticated = True
         try:
@@ -80,9 +82,9 @@ class RedditPRAW:
 
     def getnewusersubmissions(self, username: str, limit: int=25) -> praw.models.ListingGenerator:
         """
-        Return a ListingGenerator of username's newest Reddit submissions
+        Return a praw.ListingGenerator of username's newest Reddit submissions
 
-        API call can be limited to a number of submissions specified by limit
+        API call can be limited to a number of submissions, as specified by limit
         """
         # Strip out /u/ or u/ from the username
         exp = r"/?u/"
@@ -236,6 +238,9 @@ class RedditJSON():
 
     @staticmethod
     def _isredditJSON(inURL: URL=None) -> bool:
+        """
+        Check to see if link ends with .json
+        """
         if not inURL:
             raise ValueError("No URL provided")
         if not isinstance(inURL, URL):

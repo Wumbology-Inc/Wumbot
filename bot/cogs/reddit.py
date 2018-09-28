@@ -4,6 +4,7 @@ import typing
 import discord
 from discord.ext import commands
 
+
 class Reddit():
     def __init__(self, bot):
         self.bot = bot
@@ -37,6 +38,13 @@ class Reddit():
         return embed
 
     async def on_message(self, message: discord.Message):
+        """
+        Check messages for:
+
+           1. Subreddit reference (/r/subreddit) and reply with a link embed
+           2. Reddit's image/video hosting adding 'DashPlaylist.mpd' to the end of the file, which
+              links to nothing. Reply with a link embed to the media without the suffix
+        """
         # Avoid self-replies
         if message.author.id == self.bot.user.id:
             return

@@ -3,18 +3,15 @@ import json
 import logging
 import re
 import typing
-from datetime import datetime
 from pathlib import Path
 
-import aiohttp
 import discord
-import requests
 from discord.ext import commands
 from yarl import URL
 
-from bot.utils import Helpers
-from bot.models.Reddit import RedditPost, RedditPRAW, RedditJSON
 from bot.models.Overwatch import OWPatch
+from bot.models.Reddit import RedditJSON, RedditPost, RedditPRAW
+from bot.utils import Helpers
 
 
 class PatchGifParser:

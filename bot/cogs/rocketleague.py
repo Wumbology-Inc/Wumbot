@@ -2,16 +2,15 @@ import asyncio
 import json
 import logging
 import typing
-from datetime import datetime
 from pathlib import Path
 
-import aiohttp
 import discord
 from discord.ext import commands
 from yarl import URL
 
-from bot.utils import Helpers
 from bot.models.Steam import SteamNewsPost
+from bot.utils import Helpers
+
 
 class RLNewsParser:
     def __init__(self, bot):

@@ -10,8 +10,9 @@ import discord
 from discord.ext import commands
 from yarl import URL
 
-from bot.utils import Helpers
 from bot.models.Steam import SteamNewsPost
+from bot.utils import Helpers
+
 
 class MHWNewsParser:
     def __init__(self, bot):
