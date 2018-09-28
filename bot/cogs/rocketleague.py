@@ -10,8 +10,8 @@ import discord
 from discord.ext import commands
 from yarl import URL
 
-from .bot import Helpers
-from .steam import SteamNewsPost
+from bot.utils import Helpers
+from bot.models.Steam import SteamNewsPost
 
 class RLNewsParser:
     def __init__(self, bot):
@@ -29,7 +29,7 @@ class RLNewsParser:
         appID = appID if appID is not None else self.appID
 
         news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=500)
-        logging.info(f"{len(news)} RLnews posts returned by Steam's API")
+        logging.info(f"{len(news)} RL news post(s) returned by Steam's API")
         officialnews = [item for item in news if self.RLnewsfilter(item, self.psyonixstaff)]
 
         logging.info(f"Found {len(officialnews)} official RL news posts")

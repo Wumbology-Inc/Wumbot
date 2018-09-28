@@ -16,4 +16,4 @@ RUN pip install -r requirements.txt
 
 RUN apk del .pynacl_deps
 
-CMD ["python", "wumbotLogin.py"]
+CMD ["python", "-m", "bot"]

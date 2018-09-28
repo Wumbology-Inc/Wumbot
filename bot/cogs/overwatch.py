@@ -13,8 +13,8 @@ from bs4 import BeautifulSoup
 from discord.ext import commands
 from yarl import URL
 
-from .bot import Helpers
-from .reddit import RedditPost, RedditPRAW, RedditJSON
+from bot.utils import Helpers
+from bot.models.Reddit import RedditPost, RedditPRAW, RedditJSON
 
 
 class PatchGifParser:
