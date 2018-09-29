@@ -1,7 +1,7 @@
 Wumbot Extensions
 ==================================
 
-Test1
+Wumbot loads the following cogs on login
 
 .. toctree::
    :maxdepth: 2
@@ -10,3 +10,5 @@ Test1
    mhw
    overwatch
    reddit
+   rocketleague
+   wumbopresence

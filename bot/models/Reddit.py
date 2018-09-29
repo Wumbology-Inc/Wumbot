@@ -8,10 +8,8 @@ from datetime import datetime
 from pathlib import Path
 
 import aiohttp
-import discord
 import praw
 import requests
-from discord.ext import commands
 from yarl import URL
 
 
@@ -21,6 +19,9 @@ class RedditPost:
                  ):
         """
         Helper object to represent a Reddit Submission
+
+        To simplify construction from Reddit's JSON return, additional keyword arguments
+        are accepted but discarded
         """
         self.subreddit = subreddit
         self.id = id
@@ -43,7 +44,7 @@ class RedditPost:
     @staticmethod
     def fromPRAW(inSub: praw.Submission) -> RedditPost:
         """
-        Generate RedditPost from a PRAW Submission
+        Generate RedditPost from a PRAW Submission object
         """
         # Because PRAW does lazy objects, only pull the desired attributes
         submissiondict = {'subreddit': inSub.subreddit, 'id': inSub.id,
@@ -59,7 +60,14 @@ class RedditPRAW:
         credentials = RedditPRAW._loadCredentials(credentialJSON)
         self.session = praw.Reddit(client_id=credentials[0], client_secret=credentials[1],
                                 user_agent='Wumbot PRAW Agent')
-        
+        """
+        Helper class for PRAW instance
+
+        On instantiation, an attempt is made to authenticate using the input credential JSON
+        Credential JSON should contain a 'RedditOAuth' key with an (ID, secret) tuple
+
+        The isauthenticated attribute can be queried to determine authentication status
+        """
         # Try to get some submissions to check for correct authentication
         self.isauthenticated = True
         try:
@@ -74,9 +82,9 @@ class RedditPRAW:
 
     def getnewusersubmissions(self, username: str, limit: int=25) -> praw.models.ListingGenerator:
         """
-        Return a ListingGenerator of username's newest Reddit submissions
+        Return a praw.ListingGenerator of username's newest Reddit submissions
 
-        API call can be limited to a number of submissions specified by limit
+        API call can be limited to a number of submissions, as specified by limit
         """
         # Strip out /u/ or u/ from the username
         exp = r"/?u/"
@@ -147,9 +155,6 @@ class RedditJSON():
             https://old.reddit.com/r/subreddit/comments/*
 
         Other input URL formats are not supported
-
-        The skipvalidation flag allows you to skip the URL validation if it has already
-        been validated
         """
         inURL = RedditJSON._validateURL(inURL, checkJSON=False)
         if RedditJSON._isredditJSON(inURL):
@@ -168,6 +173,9 @@ class RedditJSON():
             https://old.reddit.com/r/subreddit/comments/*(/).json
 
         Other input URL formats are not supported
+
+        The skipvalidation flag allows you to skip the URL validation if it has already
+        been validated
         """
         if not skipvalidation:
             jsonURL = RedditJSON._validateURL(jsonURL, checkJSON=True)
@@ -230,6 +238,9 @@ class RedditJSON():
 
     @staticmethod
     def _isredditJSON(inURL: URL=None) -> bool:
+        """
+        Check to see if link ends with .json
+        """
         if not inURL:
             raise ValueError("No URL provided")
         if not isinstance(inURL, URL):
@@ -259,64 +270,3 @@ class RedditJSON():
             return 'submitted' not in urlparts
         else:
             return False
-
-
-class Reddit():
-    def __init__(self, bot):
-        self.bot = bot
-
-    @staticmethod
-    def buildSubredditEmbed(subredditlist: typing.List[str], embedlimit: int=3):
-        """
-        Build a message embed from a list of subreddit strings (sans '/r/')
-
-        Limit to embedlimit number of subreddits per embed, for brevity. Default is 3
-        """
-        snooURL = "https://images-eu.ssl-images-amazon.com/images/I/418PuxYS63L.png"
-
-        embed = discord.Embed(color=discord.Color(0x9c4af7))
-        embed.set_thumbnail(url=snooURL)
-        embed.set_author(name='Subreddit Embedder 9000')
-        embed.set_footer(text='Reddit', icon_url=snooURL)
-
-        if len(subredditlist) == 1:
-            embed.description = "Subreddit detected!"
-            subreddit = subredditlist[0]
-            embed.add_field(name=f"/r/{subreddit}", value=f"https://www.reddit.com/r/{subreddit}", inline=False)
-        else:
-            embed.description = "Subreddits detected!"
-            for subreddit in subredditlist[0:embedlimit]:
-                embed.add_field(name=f"/r/{subreddit}", value=f"https://www.reddit.com/r/{subreddit}", inline=False)
-            
-            if len(subredditlist) > embedlimit:
-                embed.add_field(name="Note:", value=f"For brevity, only {embedlimit} subreddits have been embedded. You linked {len(subredditlist)}")
-
-        return embed
-
-    async def on_message(self, message: discord.Message):
-        # Avoid self-replies
-        if message.author.id == self.bot.user.id:
-            return
-
-        # Check to see if /r/_subreddit (e.g. /r/python) has been typed & add a Reddit embed
-        # Ignores regular reddit links (e.g. http://www.reddit.com/r/Python)
-        testSubreddit = re.findall(r'(?:^|\s)\/?[rR]\/(\w+)', message.content)
-        if testSubreddit:
-            logging.info(f"Subreddit(s) detected: '{testSubreddit}'")
-            logging.info(f"Original message: '{message.content}'")
-            SubredditEmbed = self.buildSubredditEmbed(testSubreddit)
-            await message.channel.send(embed=SubredditEmbed)
-  
-        # Check to see if Reddit's stupid image/video hosting has added 'DashPlaylist.mpd'
-        # to the end of the URL, which links to a direct download (of nothing) rather
-        # than the web content
-        testVreddit = re.search(r'(https?:\/\/v.redd.it\/.*)(DASHPlaylist.*$)', message.content)
-        if testVreddit:
-            newURL = testVreddit.group(1)
-            logging.info(f"VReddit MPD detected: '{testVreddit.group(0)}'")
-            logging.info(f"Link converted to: {newURL}")
-            await message.channel.send(f"Here {message.author.mention}, let me fix that v.redd.it link for you: {newURL}")
-
-
-def setup(bot):
-    bot.add_cog(Reddit(bot))

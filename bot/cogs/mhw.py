@@ -10,29 +10,30 @@ import discord
 from discord.ext import commands
 from yarl import URL
 
-from .bot import Helpers
-from .steam import SteamNewsPost
+from bot.models.Steam import SteamNewsPost
+from bot.utils import Helpers
 
-class RLNewsParser:
+
+class MHWNewsParser:
     def __init__(self, bot):
         self.bot = bot
-        self.postchannelID = 494682432688226316
-        self.logJSONpath = Path('./log/postedRLnews.JSON')
-        self.postedRLnews = []
-        self.appID = 252950
-        self.psyonixstaff = ('dirkened', 'psyonix devin')
+        self.postchannelID = 478568995767713793
+        self.logJSONpath = Path('./log/postedMHWnews.JSON')
+        self.postedMHWnews = []
+        self.appID = 582010
+        self.officialaccount = "MHW_CAPCOM"
 
     async def getofficialnews(self, appID: int=None) -> typing.List:
         """
-        Return a list of SteamNewsPost objects containing official Rocket League announcements
+        Return a list of SteamNewsPost objects containing official Capcom announcements
         """
         appID = appID if appID is not None else self.appID
 
-        news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=500)
-        logging.info(f"{len(news)} RLnews posts returned by Steam's API")
-        officialnews = [item for item in news if self.RLnewsfilter(item, self.psyonixstaff)]
+        news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=600)
+        logging.info(f"{len(news)} MHW news posts returned by Steam's API")
+        officialnews = [item for item in news if self.MHWnewsfilter(item, self.officialaccount)]
 
-        logging.info(f"Found {len(officialnews)} official RL news posts")
+        logging.info(f"Found {len(officialnews)} official MHW news posts")
         return officialnews
 
     async def postpatchnotes(self, postobj: SteamNewsPost=None, channelID: int=None):
@@ -47,14 +48,14 @@ class RLNewsParser:
         postembed = discord.Embed(title=postobj.title, color=discord.Color(0x9c4af7),
                                   description=f"```{postobj.contents}```\n[View full news post]({postobj.url})\n"
                                   )
-        postembed.set_author(name=postobj.author, url=URL('https://steamcommunity.com/app/252950/announcements/'), 
-                             icon_url=URL('https://cdn.discordapp.com/attachments/417527786614554638/494692091453112320/unknown.png')
+        postembed.set_author(name='Capcom', url=URL('https://steamcommunity.com/app/582010/announcements/'), 
+                             icon_url=URL('https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Capcom_logo.svg/320px-Capcom_logo.svg')
                              )
-        postembed.set_thumbnail(url=URL('https://media.discordapp.net/attachments/417527786614554638/494691204248764416/timthumb.png'))
-        postembed.set_footer(text="What a save! What a save! What a save!", 
-                             icon_url=URL("https://cdn.discordapp.com/attachments/417527786614554638/494690857379692564/unknown.png")
+        postembed.set_thumbnail(url=URL('https://steamcdn-a.akamaihd.net/steam/apps/582010/header.jpg'))
+        postembed.set_footer(text="Brought to you by Palico power!", 
+                             icon_url=URL("https://cdn.discordapp.com/attachments/417527786614554638/487788870193381387/s-l300.png")
                              )
-        await postchannel.send('A new RL news post has been released!', embed=postembed)
+        await postchannel.send('A new MHW news post has been released!', embed=postembed)
 
     def loadposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
@@ -64,74 +65,73 @@ class RLNewsParser:
                 savednewsposts = [URL(urlstr) for urlstr in json.load(fID)]
             
             if savednewsposts:
-                self.postedRLnews = savednewsposts
-                logging.info(f"Loaded {len(self.postedRLnews)} RL news post(s) from '{logJSONpath}'")
+                self.postedMHWnews = savednewsposts
+                logging.info(f"Loaded {len(self.postedMHWnews)} MHW news post(s) from '{logJSONpath}'")
             else:
-                logging.info(f"No posted RL news posts found in JSON log")
+                logging.info(f"No posted MHW news posts found in JSON log")
         else:
-            logging.info(f"RL news post JSON log does not yet exist")
+            logging.info(f"MHW news post JSON log does not yet exist")
 
     def saveposted(self, logJSONpath: Path=None):
         logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
         
-        if self.postedRLnews:
+        if self.postedMHWnews:
             with logJSONpath.open(mode='w') as fID:
-                json.dump([str(url) for url in self.postedRLnews], fID)
-                logging.info(f"Saved {len(self.postedRLnews)} RL news post(s)")
+                json.dump([str(url) for url in self.postedMHWnews], fID)
+                logging.info(f"Saved {len(self.postedMHWnews)} MHW news post(s)")
         else:
-            logging.info("No RL news posts to save")
+            logging.info("No MHW news posts to save")
 
     async def patchcheck(self):
-        logging.info("RL News check coroutine invoked")
+        logging.info("MHW News check coroutine invoked")
         self.loadposted()
 
         posts = await self.getofficialnews()
-        newposts = [post for post in posts if post.url not in self.postedRLnews]
-        logging.info(f"Found {len(newposts)} unposted RL news posts")
+        newposts = [post for post in posts if post.url not in self.postedMHWnews]
+        logging.info(f"Found {len(newposts)} unposted MHW news posts")
         for post in reversed(newposts):  # Attempt to get close to posting in chronological order
             await self.postpatchnotes(post)
-            self.postedRLnews.append(post.url)
+            self.postedMHWnews.append(post.url)
         
         self.saveposted()
 
     @staticmethod
-    def RLnewsfilter(item: SteamNewsPost=None, psyonixstaff: typing.Tuple=None) -> bool:
+    def MHWnewsfilter(item: SteamNewsPost=None, officialaccount: str=None) -> bool:
         if not item:
             raise ValueError("No post object provided")
-        if not psyonixstaff:
+        if not officialaccount:
             raise ValueError("No account name provided")
 
-        if item.author.lower() not in psyonixstaff:
+        if item.author != officialaccount:
             return False
         else:
             return True
 
-
 async def patchchecktimer(client, sleepseconds=3600):
     await client.wait_until_ready()
-    parsers = (RLNewsParser(client),)
+    parsers = (MHWNewsParser(client),)
     while not client.is_closed():
         for p in parsers:
             await p.patchcheck()
-
+            
         await asyncio.sleep(sleepseconds)
 
 
-class RocketLeagueCommands:
+class MHWCommands:
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    async def checkRLpatch(self, ctx: commands.Context):
+    async def checkMHWpatch(self, ctx: commands.Context):
         if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
-            logging.info(f'Manual RL news check initiated by {ctx.message.author}')
-            await ctx.send("Manual RL news parsing starting now...")
-            await RLNewsParser(self.bot).patchcheck()
+            logging.info(f'Manual MHW news check initiated by {ctx.message.author}')
+            await ctx.send("Manual MHW news parsing starting now...")
+            await MHWNewsParser(self.bot).patchcheck()
         elif Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
             await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
         else:
-            logging.info(f'Manual RL news check attempted by {ctx.message.author}')
+            logging.info(f'Manual MHW news check attempted by {ctx.message.author}')
             await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
 
 def setup(bot):
-    bot.add_cog(RocketLeagueCommands(bot))
+    bot.add_cog(MHWCommands(bot))

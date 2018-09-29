@@ -5,7 +5,7 @@ import logging
 
 from discord import Game
 
-def randWumbo(wumboJSON=None):
+def randWumbo(wumboJSON=None) -> str:
     """
     Load list of Wumboisms from input JSON file & return a random string from the list
 

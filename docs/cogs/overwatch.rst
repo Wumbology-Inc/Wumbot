@@ -1,4 +1,4 @@
-Overwatch Extension
+Overwatch
 ==================================
 
 Parser Reference
@@ -36,7 +36,7 @@ Parser Reference
         Executes the patch check operations:
 
         #. Scrape Blizzard's Patch Notes
-        #. Build ``overwatch.OWPost`` objects from scraped patch notes
+        #. Build ``Models.Overwatch.OWPost`` objects from scraped patch notes
         #. Check patch references against those previously posted
         #. If new patch(es): Build embed, post to channel, and save the patch reference(s) to the local JSON log
 
@@ -71,8 +71,12 @@ Parser Reference
 
         Executes the patch check operations:
 
-        #. Parse /u/itsjieyang's submission JSON for Gfycat submissions to /r/overwatch
-        #. Build `reddit.RedditPost` objects
+        #. Parse /u/itsjieyang's submissions for Gfycat submissions to /r/overwatch
+
+        .. note::
+            An attempt is made to open an authenticated `PRAW <https://github.com/praw-dev/praw>`_ session to query submissions. If a session cannot be generated, Reddit's JSON is used as a fallback
+
+        #. Build `Models.Reddit.RedditPost` objects
         #. Check Gfycat URLs against those previously posted
         #. If new patch GIF(s): Build embed, post to channel, and save the Gfycat permalink to the local JSON log
 
@@ -110,48 +114,3 @@ Commands are prefixed with ``~``
 
     .. note::
         This command is only enabled for the server owner via DM.
-
-Class Reference
----------------
-.. class:: overwatch.OWPatch(**kwargs)
-
-    Helper class to generate an object from Blizzard's Patch Notes
-
-    .. attribute:: patchref(str)
-
-        Patch reference ID
-
-        e.g. ``'patch-50148'``
-
-    .. attribute:: ver(str)
-
-        Patch version number
-
-        e.g. ``'1.28.0.1'``
-
-    .. attribute:: patchdate(datetime)
-
-        Patch date (UTC)
-
-        e.g. ``dt.strptime('09/11/2018', '%m/%d/%Y')``
-
-    .. attribute:: patchURL(yarl.URL)
-
-        Patch notes permalink
-
-        Patch note permalink is provided by `BlizzTrack <https://blizztrack.com/patch_notes/overwatch/latest>`_
-
-    .. attribute:: bannerURL(yarl.URL)
-
-        Blizzard patch banner URL permalink
-
-    .. staticmethod:: getblizztrack(patchref:str) -> yarl.URL
-
-        Build a ``yarl.URL`` object from a patch reference ID
-
-        .. code-block:: python3
-
-            >>> from cogs import overwatch
-            >>> patchURL = overwatch.PatchNotesParser.getblizztrack('50148')
-            >>> print(patchURL)
-            https://blizztrack.com/patch_notes/overwatch/50148
