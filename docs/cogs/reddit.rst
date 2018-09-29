@@ -1,4 +1,4 @@
-Reddit Extension
+Reddit
 ==================================
 
 Event Reference
@@ -25,81 +25,3 @@ Wumbot will strip ``DashPlaylist.mpd`` and respond with the corrected link:
 
     [13:37] ELA: https://v.redd.it/k32sq2cwmdi01/DASHPlaylist.mpd
     [13:37] Wumbot: Here ELA, let me fix that v.redd.it link for you: https://v.redd.it/k32sq2cwmdi01/
-
-Class Reference
----------------
-
-.. class:: reddit.RedditPost(**kwargs)
-
-    Helper class to generate an object from Reddit JSON
-
-    .. attribute:: kind(str)
-
-        Submission kind
-
-        Defined per `Reddit's API documentation <https://www.reddit.com/dev/api/>`_
-
-    .. attribute:: id(str)
-
-        Unique submission ID
-
-        `Base36 <https://en.wikipedia.org/wiki/Base36>`_ encoded
-
-    .. attribute:: subreddit(str)
-
-        Submission subreddit
-
-    .. attribute:: title(str)
-
-        Submission title
-
-    .. attribute:: createdUTC(datetime)
-
-        Post creation date (UTC)
-
-    .. attribute:: contentURL(yarl.URL)
-
-        Submission permalink
-
-    .. staticmethod:: fromJSON(jsonURL: str=None) -> typing.List
-
-        Return a list of ``reddit.RedditPost`` objects from an input Reddit JSON URL
-
-        Supported URL schemas are:
-
-        .. code-block:: none
-
-            https://old.reddit.com/u(ser)/username/submitted(/)
-            https://old.reddit.com/r/subreddit(/)
-            https://old.reddit.com/r/subreddit/comments/*
-
-        Other input URL formats are not supported
-
-    .. staticmethod:: fromURL(inURL: typing.Union[str, yarl.URL]=None) -> typing.List:
-
-        Return a list of ``reddit.RedditPost`` objects from an input Reddit URL
-
-        Supported URL schemas are:
-
-        .. code-block:: none
-
-            https://old.reddit.com/u(ser)/username/submitted(/)
-            https://old.reddit.com/r/subreddit(/)
-            https://old.reddit.com/r/subreddit/comments/*
-
-        Other input URL formats are not supported
-
-    .. comethod:: asyncfromURL(inURL: typing.Union[str, yarl.URL]=None) -> typing.List:
-        :staticmethod:
-
-        Return a list of ``reddit.RedditPost`` objects from an input Reddit URL
-
-        Supported URL schemas are:
-
-        .. code-block:: none
-
-            https://old.reddit.com/u(ser)/username/submitted(/)
-            https://old.reddit.com/r/subreddit(/)
-            https://old.reddit.com/r/subreddit/comments/*
-
-        Other input URL formats are not supported

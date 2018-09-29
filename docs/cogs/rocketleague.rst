@@ -1,12 +1,12 @@
-Monster Hunter World
+Rocket League
 ==================================
 
 Parser Reference
 ----------------
 
-.. class:: mhw.MHWNewsParser
+.. class:: rocketleague.RLNewsParser
 
-    Official Capcom Monster Hunter World announcements monitor
+    Official Psyonix Rocket League announcements monitor
 
     .. attribute:: bot(WumbotClient)
 
@@ -20,26 +20,26 @@ Parser Reference
 
         Path to JSON storage file
 
-    .. attribute:: postedMHWnews(List[yarl.URL])
+    .. attribute:: postedRLnews(List[yarl.URL])
 
         ``List`` containing posted news posts
 
-        Patches are stored as Steam news permalinks, as ``yarl.URL`` (e.g. ``[URL('https://steamcommunity.com/games/582010/announcements/detail/1689302358462352379')]``)
+        Patches are stored as Steam news permalinks, as ``yarl.URL`` (e.g. ``[URL('https://steamcommunity.com/games/252950/announcements/detail/1708444560032073223')]``)
 
     .. attribute:: appID(int)
 
         Steam app ID
 
-    .. attribute:: officialaccount(str)
+    .. attribute:: psyonixstaff(Tuple)
 
-        Official account name
+        Tuple containing account names of Psyonix employees, as ``str``
 
     .. comethod:: patchcheck
         :classmethod:
 
         Executes the patch check operations:
 
-        #. Parse Steam News posts for posts made by the account specified by ``MHWNewsParser.officialaccount``
+        #. Parse Steam News posts for posts made by an account specified by ``RLNewsParser.psyonixstaff``
         #. Build ``Models.Steam.SteamNewsPost`` objects
         #. Check news URLs against those previously posted
         #. If new news post(s): Build embed, post to channel, and save the Steam news permalink to the local JSON log
@@ -48,15 +48,15 @@ Parser Reference
 
     Asynchronous patch checking loop for use with Discord.py's event loop
 
-    ``mhw.MHWNewsParser`` is called every ``sleepseconds``
+    ``rocketleague.RLNewsParser`` is called every ``sleepseconds``
 
 Command Reference
 -----------------
 Commands are prefixed with ``~``
 
-.. function:: ~checkMHWpatch
+.. function:: ~checkRLpatch
 
-    Manually invoke the ``mhw.MHWNewsParser.patchcheck()`` coroutine
+    Manually invoke the ``rocketleague.RLNewsParser.patchcheck()`` coroutine
 
     .. note::
         This command is only enabled for the server owner via DM.

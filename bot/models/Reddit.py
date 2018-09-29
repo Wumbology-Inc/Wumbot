@@ -64,7 +64,7 @@ class RedditPRAW:
         Helper class for PRAW instance
 
         On instantiation, an attempt is made to authenticate using the input credential JSON
-        Credential JSON should contain a 'RedditOAuth' key with a (ID, secret) tuple
+        Credential JSON should contain a 'RedditOAuth' key with an (ID, secret) tuple
 
         The isauthenticated attribute can be queried to determine authentication status
         """
@@ -155,9 +155,6 @@ class RedditJSON():
             https://old.reddit.com/r/subreddit/comments/*
 
         Other input URL formats are not supported
-
-        The skipvalidation flag allows you to skip the URL validation if it has already
-        been validated
         """
         inURL = RedditJSON._validateURL(inURL, checkJSON=False)
         if RedditJSON._isredditJSON(inURL):
@@ -176,6 +173,9 @@ class RedditJSON():
             https://old.reddit.com/r/subreddit/comments/*(/).json
 
         Other input URL formats are not supported
+
+        The skipvalidation flag allows you to skip the URL validation if it has already
+        been validated
         """
         if not skipvalidation:
             jsonURL = RedditJSON._validateURL(jsonURL, checkJSON=True)

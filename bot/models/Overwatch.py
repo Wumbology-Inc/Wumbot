@@ -10,6 +10,9 @@ class OWPatch():
     def __init__(self, patchref: str=None, ver: str=None, patchdate: datetime=None, 
                  patchURL: URL=None, bannerURL: URL=None
                  ):
+        """
+        Helper object to represent Blizzard's Overwatch Patch notes
+        """
         defaultpatchURL = URL('https://playoverwatch.com/en-us/news/patch-notes/pc')
         defaultbannerURL = URL('https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png')
         
