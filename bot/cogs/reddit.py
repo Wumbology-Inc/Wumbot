@@ -1,8 +1,11 @@
+import json
 import re
 import typing
 
 import discord
+import requests
 from discord.ext import commands
+from yarl import URL
 
 
 class Reddit():
@@ -42,6 +45,7 @@ class Reddit():
         Check messages for:
 
            1. Subreddit reference (/r/subreddit) and reply with a link embed
+              Invalid subreddits are ignored
            2. Reddit's image/video hosting adding 'DashPlaylist.mpd' to the end of the file, which
               links to nothing. Reply with a link embed to the media without the suffix
         """
@@ -55,8 +59,10 @@ class Reddit():
         if testSubreddit:
             logging.info(f"Subreddit(s) detected: '{testSubreddit}'")
             logging.info(f"Original message: '{message.content}'")
-            SubredditEmbed = self.buildSubredditEmbed(testSubreddit)
-            await message.channel.send(embed=SubredditEmbed)
+            subreddits = [subreddit for subreddit in testSubreddit if self._isvalidsubreddit(subreddit)]
+            if subreddits:
+                SubredditEmbed = self.buildSubredditEmbed(testSubreddit)
+                await message.channel.send(embed=SubredditEmbed)
   
         # Check to see if Reddit's stupid image/video hosting has added 'DashPlaylist.mpd'
         # to the end of the URL, which links to a direct download (of nothing) rather
@@ -67,6 +73,29 @@ class Reddit():
             logging.info(f"VReddit MPD detected: '{testVreddit.group(0)}'")
             logging.info(f"Link converted to: {newURL}")
             await message.channel.send(f"Here {message.author.mention}, let me fix that v.redd.it link for you: {newURL}")
+
+    @staticmethod 
+    def _isvalidsubreddit(subreddit:str) -> bool:
+        """
+        Return True if subreddit resolves to a valid Reddit subreddit, else return False
+        
+        If the JSON request times out or is API throttled, True is returned as a fallback
+        """
+        baseURL = URL('https://old.reddit.com/')
+        testURL = baseURL.with_path(f"/r/{subreddit}.json")
+        
+        headers = {'user-agent': 'Wumbot JSON Fallback'}
+        r = requests.get(testURL, headers=headers).json()
+        try:
+            msg = r['message']
+            if msg.lower() == 'not found':
+                logging.info(f"Invalid subreddit detected: '{subreddit}'")
+                return False
+            else:
+                logging.info(f"Unhandled Reddit response: '{msg}'")
+                return True
+        except KeyError as e:
+            return True
 
 
 def setup(bot):
