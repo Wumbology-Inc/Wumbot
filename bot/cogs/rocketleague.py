@@ -68,7 +68,7 @@ class RLNewsParser(NewsParser):
                 await self.postpatchnotes(post)
                 self.postednews.append(post.url)
             
-                self.saveposted(converter=str)
+            self.saveposted(converter=str)
 
     @staticmethod
     def RLnewsfilter(item: SteamNewsPost=None, psyonixstaff: typing.Tuple=None) -> bool:
