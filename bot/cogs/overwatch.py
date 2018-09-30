@@ -8,6 +8,7 @@ import discord
 from discord.ext import commands
 from yarl import URL
 
+from bot.models.ManualCheck import ManualCheck
 from bot.models.NewsParser import NewsParser
 from bot.models.Overwatch import OWPatch
 from bot.models.Reddit import RedditJSON, RedditPost, RedditPRAW
@@ -75,7 +76,8 @@ class PatchGifParser(NewsParser):
             await self.postpatchgif(post)
             self.postednews.append(post.contentURL.human_repr())
         
-        self.saveposted(converter=str)
+        if newposts:
+            self.saveposted(converter=str)
 
     @staticmethod
     def gfygif(inURL: typing.Union[str, URL]) -> URL:
@@ -129,7 +131,8 @@ class PatchNotesParser(NewsParser):
             await self.postpatchnotes(patch)
             self.postednews.append(patch.ver)
         
-        self.saveposted(converter=str)
+        if newpatches:
+            self.saveposted(converter=str)
 
 
 class OverwatchCommands:
@@ -138,27 +141,11 @@ class OverwatchCommands:
 
     @commands.command()
     async def checkOWgif(self, ctx: commands.Context):
-        if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
-            logging.info(f'Manual OW patch GIF check initiated by {ctx.message.author}')
-            await ctx.send("Manual OW patch GIF parsing starting now...")
-            await PatchGifParser(self.bot).patchcheck()
-        elif Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
-            await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
-        else:
-            logging.info(f'Manual OW patch GIF check attempted by {ctx.message.author}')
-            await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
+        await ManualCheck.check(ctx=ctx, toinvoke=PatchGifParser(self.bot).patchcheck, commandstr='OW Patch GIF')
 
     @commands.command()
     async def checkOWpatch(self, ctx: commands.Context):
-        if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
-            logging.info(f'Manual OW patch check initiated by {ctx.message.author}')
-            await ctx.send("Manual OW patch notes parsing starting now...")
-            await PatchNotesParser(self.bot).patchcheck()
-        elif Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
-            await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
-        else:
-            logging.info(f'Manual OW patch check attempted by {ctx.message.author}')
-            await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
+        await ManualCheck.check(ctx=ctx, toinvoke=PatchNotesParser(self.bot).patchcheck, commandstr='OW Patch')
 
 def setup(bot):
     bot.add_cog(OverwatchCommands(bot))
