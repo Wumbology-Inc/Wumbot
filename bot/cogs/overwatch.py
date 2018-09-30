@@ -12,7 +12,6 @@ from bot.models.ManualCheck import ManualCheck
 from bot.models.NewsParser import NewsParser
 from bot.models.Overwatch import OWPatch
 from bot.models.Reddit import RedditJSON, RedditPost, RedditPRAW
-from bot.utils import Helpers
 
 
 class PatchGifParser(NewsParser):
@@ -43,7 +42,7 @@ class PatchGifParser(NewsParser):
             if postobj.subreddit == 'Overwatch' and 'patch' in postobj.title.lower():
                 patchposts.append(postobj)
 
-        logging.info(f"Found {len(patchposts)} OW Patch GIF post(s)")
+        logging.info(f"Found {len(patchposts)} {self.parsername}")
         return patchposts
 
     async def postpatchgif(self, postobj: RedditPost=None, channelID: int=None):
@@ -66,17 +65,18 @@ class PatchGifParser(NewsParser):
         await postchannel.send('A new patch gif has been posted!', embed=postembed)
 
     async def patchcheck(self):
-        logging.info("OW patch GIF check coroutine invoked")
+        logging.info(f"{self.parsername} check coroutine invoked")
         self.loadposted(converter=URL)
 
         posts = await self.getpatchgifs()
         newposts = [post for post in posts if post.contentURL not in self.postednews]
-        logging.info(f"Found {len(newposts)} new GIF(s) to post")
-        for post in reversed(newposts):  # Attempt to get close to posting in chronological order
-            await self.postpatchgif(post)
-            self.postednews.append(post.contentURL.human_repr())
+        logging.info(f"Found {len(newposts)} new {self.parsername} to post")
         
         if newposts:
+            for post in reversed(newposts):  # Attempt to get close to posting in chronological order
+                await self.postpatchgif(post)
+                self.postednews.append(post.contentURL.human_repr())
+
             self.saveposted(converter=str)
 
     @staticmethod
@@ -126,12 +126,13 @@ class PatchNotesParser(NewsParser):
 
         patches = await OWPatch.asyncfromURL(self.patchesURL)
         newpatches = [patch for patch in patches if patch.ver not in self.postednews]
-        logging.info(f"Found {len(newpatches)} new OW patch(es) to post")
-        for patch in reversed(newpatches):  # Attempt to get close to posting in chronological order
-            await self.postpatchnotes(patch)
-            self.postednews.append(patch.ver)
+        logging.info(f"Found {len(newpatches)} new {self.parsername} to post")
         
         if newpatches:
+            for patch in reversed(newpatches):  # Attempt to get close to posting in chronological order
+                await self.postpatchnotes(patch)
+                self.postednews.append(patch.ver)
+
             self.saveposted(converter=str)
 
 

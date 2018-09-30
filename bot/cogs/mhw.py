@@ -1,4 +1,3 @@
-import asyncio
 import json
 import logging
 import typing
@@ -10,16 +9,17 @@ import discord
 from discord.ext import commands
 from yarl import URL
 
+from bot.models.ManualCheck import ManualCheck
+from bot.models.NewsParser import NewsParser
 from bot.models.Steam import SteamNewsPost
-from bot.utils import Helpers
 
 
-class MHWNewsParser:
+class MHWNewsParser(NewsParser):
     def __init__(self, bot):
-        self.bot = bot
+        super().__init__(bot)
+        self.parsername = "MHW News"
         self.postchannelID = 478568995767713793
         self.logJSONpath = Path('./log/postedMHWnews.JSON')
-        self.postedMHWnews = []
         self.appID = 582010
         self.officialaccount = "MHW_CAPCOM"
 
@@ -30,10 +30,10 @@ class MHWNewsParser:
         appID = appID if appID is not None else self.appID
 
         news = await SteamNewsPost.asyncgetnewsforapp(appID=appID, count=15, maxlength=600)
-        logging.info(f"{len(news)} MHW news posts returned by Steam's API")
+        logging.info(f"{len(news)} {self.parsername} post(s) returned by Steam's API")
         officialnews = [item for item in news if self.MHWnewsfilter(item, self.officialaccount)]
 
-        logging.info(f"Found {len(officialnews)} official MHW news posts")
+        logging.info(f"Found {len(officialnews)} official {self.parsername} post(s)")
         return officialnews
 
     async def postpatchnotes(self, postobj: SteamNewsPost=None, channelID: int=None):
@@ -55,45 +55,22 @@ class MHWNewsParser:
         postembed.set_footer(text="Brought to you by Palico power!", 
                              icon_url=URL("https://cdn.discordapp.com/attachments/417527786614554638/487788870193381387/s-l300.png")
                              )
-        await postchannel.send('A new MHW news post has been released!', embed=postembed)
-
-    def loadposted(self, logJSONpath: Path=None):
-        logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
-
-        if logJSONpath.exists():
-            with logJSONpath.open(mode='r') as fID:
-                savednewsposts = [URL(urlstr) for urlstr in json.load(fID)]
-            
-            if savednewsposts:
-                self.postedMHWnews = savednewsposts
-                logging.info(f"Loaded {len(self.postedMHWnews)} MHW news post(s) from '{logJSONpath}'")
-            else:
-                logging.info(f"No posted MHW news posts found in JSON log")
-        else:
-            logging.info(f"MHW news post JSON log does not yet exist")
-
-    def saveposted(self, logJSONpath: Path=None):
-        logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
-        
-        if self.postedMHWnews:
-            with logJSONpath.open(mode='w') as fID:
-                json.dump([str(url) for url in self.postedMHWnews], fID)
-                logging.info(f"Saved {len(self.postedMHWnews)} MHW news post(s)")
-        else:
-            logging.info("No MHW news posts to save")
+        await postchannel.send(f"A new {self.parsername} post has been released!", embed=postembed)
 
     async def patchcheck(self):
-        logging.info("MHW News check coroutine invoked")
-        self.loadposted()
+        logging.info(f"{self.parsername} check coroutine invoked")
+        self.loadposted(converter=URL)
 
         posts = await self.getofficialnews()
-        newposts = [post for post in posts if post.url not in self.postedMHWnews]
-        logging.info(f"Found {len(newposts)} unposted MHW news posts")
-        for post in reversed(newposts):  # Attempt to get close to posting in chronological order
-            await self.postpatchnotes(post)
-            self.postedMHWnews.append(post.url)
-        
-        self.saveposted()
+        newposts = [post for post in posts if post.url not in self.postednews]
+        logging.info(f"Found {len(newposts)} unposted {self.parsername} posts")
+
+        if newposts:
+            for post in reversed(newposts):  # Attempt to get close to posting in chronological order
+                await self.postpatchnotes(post)
+                self.postednews.append(post.url)
+
+            self.saveposted(converter=str)
 
     @staticmethod
     def MHWnewsfilter(item: SteamNewsPost=None, officialaccount: str=None) -> bool:
@@ -114,15 +91,8 @@ class MHWCommands:
 
     @commands.command()
     async def checkMHWpatch(self, ctx: commands.Context):
-        if Helpers.isDM(ctx.message.channel) and Helpers.isOwner(ctx.message.author):
-            logging.info(f'Manual MHW news check initiated by {ctx.message.author}')
-            await ctx.send("Manual MHW news parsing starting now...")
-            await MHWNewsParser(self.bot).patchcheck()
-        elif Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
-            await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
-        else:
-            logging.info(f'Manual MHW news check attempted by {ctx.message.author}')
-            await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
+        await ManualCheck.check(ctx=ctx, toinvoke=MHWNewsParser(self.bot).patchcheck, commandstr='MHW news')
+
 
 def setup(bot):
     bot.add_cog(MHWCommands(bot))
