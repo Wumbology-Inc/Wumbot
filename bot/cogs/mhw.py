@@ -107,15 +107,6 @@ class MHWNewsParser:
         else:
             return True
 
-async def patchchecktimer(client, sleepseconds=3600):
-    await client.wait_until_ready()
-    parsers = (MHWNewsParser(client),)
-    while not client.is_closed():
-        for p in parsers:
-            await p.patchcheck()
-            
-        await asyncio.sleep(sleepseconds)
-
 
 class MHWCommands:
     def __init__(self, bot):

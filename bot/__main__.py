@@ -5,7 +5,8 @@ from datetime import datetime
 
 from discord.ext import commands
 
-from .cogs import mhw, overwatch, rocketleague, wumbopresence
+from bot.cogs import mhw, overwatch, rocketleague, wumbopresence
+from bot.models.NewsParser import patchchecktimer
 
 
 class WumbotClient(commands.Bot):
@@ -40,9 +41,13 @@ if credentials:
 
     # Setup event loops
     client.loop.create_task(wumbopresence.randWumboTimer(client, wumboJSON='./bot/wumbolist.JSON'))
-    client.loop.create_task(overwatch.patchchecktimer(client))
-    client.loop.create_task(mhw.patchchecktimer(client))
-    client.loop.create_task(rocketleague.patchchecktimer(client))
+    patchchecks = (
+        overwatch.PatchGifParser(client),
+        overwatch.PatchNotesParser(client),
+        mhw.MHWNewsParser(client),
+        rocketleague.RLNewsParser(client)
+    )
+    client.loop.create_task(patchchecktimer(client, patchchecks))
 
     # Finally, try to log in
     client.run(credentials)

@@ -106,16 +106,6 @@ class RLNewsParser:
             return True
 
 
-async def patchchecktimer(client, sleepseconds=3600):
-    await client.wait_until_ready()
-    parsers = (RLNewsParser(client),)
-    while not client.is_closed():
-        for p in parsers:
-            await p.patchcheck()
-
-        await asyncio.sleep(sleepseconds)
-
-
 class RocketLeagueCommands:
     def __init__(self, bot):
         self.bot = bot

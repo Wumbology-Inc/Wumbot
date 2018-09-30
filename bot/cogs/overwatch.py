@@ -182,16 +182,6 @@ class PatchNotesParser:
         self.saveposted()
 
 
-async def patchchecktimer(client, sleepseconds: int=3600):
-    await client.wait_until_ready()
-    parsers = (PatchGifParser(client), PatchNotesParser(client))
-    while not client.is_closed():
-        for p in parsers:
-            await p.patchcheck()
-            
-        await asyncio.sleep(sleepseconds)
-
-
 class OverwatchCommands:
     def __init__(self, bot):
         self.bot = bot
