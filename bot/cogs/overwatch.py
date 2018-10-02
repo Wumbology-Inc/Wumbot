@@ -17,10 +17,15 @@ from bot.models.Reddit import RedditJSON, RedditPost, RedditPRAW
 class PatchGifParser(NewsParser):
     def __init__(self, bot):
         super().__init__(bot)
-        self.parsername = "OW GIF(s)"
         self.postjsonURL = URL("https://www.reddit.com/user/itsjieyang/submitted.json")
-        self.postchannelID = 477916849879908386
+        # self.postchannelID = 477916849879908386
+        self.postchannelID = 417527786614554638
         self.logJSONpath = Path('./log/postedGIFs.JSON')
+
+        self._parsername = "OW GIF(s)"
+        self._loadconverter = URL
+        self._saveconverter = str
+        self._comparator = 'contentURL'
 
     async def getpatchgifs(self, jsonURL: URL=None):
         """
@@ -42,10 +47,10 @@ class PatchGifParser(NewsParser):
             if postobj.subreddit == 'Overwatch' and 'patch' in postobj.title.lower():
                 patchposts.append(postobj)
 
-        logging.info(f"Found {len(patchposts)} {self.parsername}")
+        logging.info(f"Found {len(patchposts)} {self._parsername}")
         return patchposts
 
-    async def postpatchgif(self, postobj: RedditPost=None, channelID: int=None):
+    async def postembed(self, postobj: RedditPost=None, channelID: int=None):
         channelID = channelID if channelID is not None else self.postchannelID
 
         if postobj is None:
@@ -65,19 +70,8 @@ class PatchGifParser(NewsParser):
         await postchannel.send('A new patch gif has been posted!', embed=postembed)
 
     async def patchcheck(self):
-        logging.info(f"{self.parsername} check coroutine invoked")
-        self.loadposted(converter=URL)
-
         posts = await self.getpatchgifs()
-        newposts = [post for post in posts if post.contentURL not in self.postednews]
-        logging.info(f"Found {len(newposts)} new {self.parsername} to post")
-        
-        if newposts:
-            for post in reversed(newposts):  # Attempt to get close to posting in chronological order
-                await self.postpatchgif(post)
-                self.postednews.append(post.contentURL.human_repr())
-
-            self.saveposted(converter=str)
+        await super().patchcheck(posts)
 
     @staticmethod
     def gfygif(inURL: typing.Union[str, URL]) -> URL:
@@ -95,12 +89,16 @@ class PatchGifParser(NewsParser):
 class PatchNotesParser(NewsParser):
     def __init__(self, bot):
         super().__init__(bot)
-        self.parsername = "OW Patch(es)"
         self.patchesURL = URL('https://playoverwatch.com/en-us/news/patch-notes/pc')
         self.postchannelID = 477916849879908386
         self.logJSONpath = Path('./log/postedOWpatches.JSON')
 
-    async def postpatchnotes(self, postobj: OWPatch=None, channelID: int=None):
+        self._parsername = "OW Patch(es)"
+        self._loadconverter = str
+        self._saveconverter = str
+        self._comparator = 'ver'
+
+    async def postembed(self, postobj: OWPatch=None, channelID: int=None):
         channelID = channelID if channelID is not None else self.postchannelID
         if postobj is None:
             raise ValueError("No post object provided")
@@ -121,19 +119,8 @@ class PatchNotesParser(NewsParser):
         await postchannel.send('A new Overwatch Patch has been released!', embed=postembed)
 
     async def patchcheck(self):
-        logging.info("OW Patch check coroutine invoked")
-        self.loadposted(converter=str)
-
-        patches = await OWPatch.asyncfromURL(self.patchesURL)
-        newpatches = [patch for patch in patches if patch.ver not in self.postednews]
-        logging.info(f"Found {len(newpatches)} new {self.parsername} to post")
-        
-        if newpatches:
-            for patch in reversed(newpatches):  # Attempt to get close to posting in chronological order
-                await self.postpatchnotes(patch)
-                self.postednews.append(patch.ver)
-
-            self.saveposted(converter=str)
+        posts = await OWPatch.asyncfromURL(self.patchesURL)
+        await super().patchcheck(posts)
 
 
 class OverwatchCommands:

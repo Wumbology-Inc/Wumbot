@@ -10,30 +10,44 @@ class NewsParser:
         self.bot = bot
         self.postednews = []
 
-    def loadposted(self, logJSONpath: Path=None, converter: typing.Callable=str):
-        logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
-        
-        if logJSONpath.exists():
-            with logJSONpath.open(mode='r') as fID:
-                savednews = [converter(post) for post in json.load(fID)]
+        self._parsername = None
+        self._loadconverter = None
+        self._saveconverter = None
+
+    def loadposted(self):
+        if self.logJSONpath.exists():
+            with self.logJSONpath.open(mode='r') as fID:
+                savednews = [self._loadconverter(post) for post in json.load(fID)]
             
             if savednews:
                 self.postednews = savednews
-                logging.info(f"Loaded {len(self.postednews)} {self.parsername} from '{logJSONpath}'")
+                logging.info(f"Loaded {len(self.postednews)} {self._parsername} from '{self.logJSONpath}'")
             else:
-                logging.info(f"No posted {self.parsername} found in JSON log")
+                logging.info(f"No posted {self._parsername} found in JSON log")
         else:
-            logging.info(f"{self.parsername} log JSON does not yet exist")
+            logging.info(f"{self._parsername} log JSON does not yet exist")
 
-    def saveposted(self, logJSONpath: Path=None, converter: typing.Callable=str):
-        logJSONpath = logJSONpath if logJSONpath is not None else self.logJSONpath
-        
+    def saveposted(self):
         if self.postednews:
-            with logJSONpath.open(mode='w') as fID:
-                json.dump([converter(post) for post in self.postednews], fID)
-            logging.info(f"Saved {len(self.postednews)} {self.parsername} post(s)")
+            with self.logJSONpath.open(mode='w') as fID:
+                json.dump([self._saveconverter(post) for post in self.postednews], fID)
+            logging.info(f"Saved {len(self.postednews)} {self._parsername} post(s)")
         else:
-            logging.info(f"No {self.parsername} to save")
+            logging.info(f"No {self._parsername} to save")
+
+    async def patchcheck(self, posts):
+        logging.info(f"{self._parsername} check coroutine invoked")
+        self.loadposted()
+
+        newposts = [post for post in posts if getattr(post, self._comparator) not in self.postednews]
+        logging.info(f"Found {len(newposts)} new {self._parsername} to post")
+        
+        if newposts:
+            for post in reversed(newposts):  # Attempt to get close to posting in chronological order
+                await self.postembed(post)
+                self.postednews.append(self._loadconverter(getattr(post, self._comparator)))
+
+            self.saveposted()
 
 async def patchchecktimer(client, parsers: typing.Tuple=(), sleepseconds: int=3600):
     await client.wait_until_ready()
