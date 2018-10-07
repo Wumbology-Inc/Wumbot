@@ -13,8 +13,14 @@ class ManualCheck:
             logging.info(f"Manual {commandstr} check initiated by {ctx.message.author}")
             await ctx.send(f"Manual {commandstr} parsing starting now...")
             await toinvoke()
-        elif Helpers.isOwner(ctx.message.author) and not Helpers.isDM(ctx.message.channel):
-            await ctx.send(f'{ctx.message.author.mention}, this command only works in a DM')
+        elif Helpers.isOwner(ctx.message.author) and not Helpers.isDM(
+            ctx.message.channel
+        ):
+            await ctx.send(
+                f"{ctx.message.author.mention}, this command only works in a DM"
+            )
         else:
-            logging.info(f'Manual {commandstr} check attempted by {ctx.message.author}')
-            await ctx.send(f'{ctx.message.author.mention}, you are not authorized to perform this operation')
+            logging.info(f"Manual {commandstr} check attempted by {ctx.message.author}")
+            await ctx.send(
+                f"{ctx.message.author.mention}, you are not authorized to perform this operation"
+            )
