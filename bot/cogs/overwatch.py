@@ -53,33 +53,49 @@ class PatchGifParser(NewsParser):
         return patchposts
 
     async def postembed(self, postobj: RedditPost = None, channelID: int = None):
+        """
+        Generate & send an embed for the input RedditPost object, built from 
+        /u/itsjieyang's Reddit submissions.
+
+        There are 2 message formats:
+            * Gfycat: Generate an embed with the .gif version of the gfy embedded
+            * Youtube & Streamable: Use a regular message and defer to Discord's embed
+        """
         channelID = channelID if channelID is not None else self.postchannelID
 
-        if postobj is None:
-            raise ValueError("No post object provided")
-        if not isinstance(postobj, RedditPost):
-            raise TypeError(
-                f"Invalid post type provided: '{type(postobj)}', input must be RedditPost"
-            )
+        host = postobj.contentURL.host.lower()
+        if "gfycat.com" in host:
+            if postobj is None:
+                raise ValueError("No post object provided")
+            if not isinstance(postobj, RedditPost):
+                raise TypeError(
+                    f"Invalid post type provided: '{type(postobj)}', input must be RedditPost"
+                )
 
-        postchannel = self.bot.get_channel(channelID)
+            postchannel = self.bot.get_channel(channelID)
 
-        postembed = discord.Embed(
-            title=postobj.title,
-            color=discord.Color(0x9C4AF7),
-            description=f"[View Full Resolution]({postobj.contentURL})\n\n[View Reddit Post]({postobj.permalink})",
-        )
-        postembed.set_author(
-            name="/u/itsjieyang", url=URL("https://www.reddit.com/user/itsjieyang")
-        )
-        postembed.set_thumbnail(
-            url=URL(
-                "https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png"
+            postembed = discord.Embed(
+                title=postobj.title,
+                color=discord.Color(0x9C4AF7),
+                description=f"[View Full Resolution]({postobj.contentURL})\n\n[View Reddit Post]({postobj.permalink})",
             )
-        )
-        postembed.set_image(url=self.gfygif(postobj.contentURL))
-        postembed.set_footer(text="Overwatch, it's Ameizing!")
-        await postchannel.send("A new patch gif has been posted!", embed=postembed)
+            postembed.set_author(
+                name="/u/itsjieyang", url=URL("https://www.reddit.com/user/itsjieyang")
+            )
+            postembed.set_thumbnail(
+                url=URL(
+                    "https://gear.blizzard.com/media/wysiwyg/default/logos/ow-logo-white-nds.png"
+                )
+            )
+            postembed.set_image(url=self.gfygif(postobj.contentURL))
+            postembed.set_footer(text="Overwatch, it's Ameizing!")
+            await postchannel.send("A new patch gif has been posted!", embed=postembed)
+        else:
+            msg = (
+                f"A new patch rundown video has been posted!\n{postobj.contentURL}\n\n"
+                f"View the full Reddit post here:\n<{postobj.permalink}>"
+            )
+            await postchannel.send(msg)
 
     async def patchcheck(self):
         posts = await self.getpatchgifs()
