@@ -14,6 +14,9 @@ Subreddit Detection & Embed
 """""""""""""""""""""""""""
 When a message is sent containing one or more subreddits (e.g. "``/r/Python`` is the best subreddit!"), Wumbot will generate and respond with a ``discord.Embed`` object that links to the subreddit(s).
 
+.. note::
+    Subreddits are tested for validity. If a subreddit is invalid it will be ignored by the embed generator.
+
 
 v.Reddit ``DashPlaylist.mpd`` Detection
 """""""""""""""""""""""""""""""""""""""

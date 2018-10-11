@@ -9,3 +9,5 @@ Abstract base models by Wumbot's cogs
    Overwatch
    Reddit
    Steam
+   NewsParser
+   ManualCheck

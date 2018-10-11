@@ -15,11 +15,11 @@ extras_require = {
 setup(name='wumbot',
       author='sco1',
       url='https://github.com/Wumbology-Inc/Wumbot',
-      version='v1.0.0',
+      version='v0.10.0',
       description='A Python Discord bot for Wumbology, Inc.',
       long_description=readme,
       extras_require=extras_require,
-      python_requires='>=3.6.0',
+      python_requires='>=3.7.0',
       classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
