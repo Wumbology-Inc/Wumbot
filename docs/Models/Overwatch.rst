@@ -35,6 +35,21 @@ Class Reference
 
         Blizzard patch banner URL permalink
 
+    .. comethod:: asyncfromURL(inURL: typing.Union[str, URL]) -> typing.List
+        :staticmethod:
+
+        Return a list of Overwatch.OWPatch objects parsed from inURL.
+
+        Default URL is Blizzard's Overwatch PC patch notes. Other URLs are not explicitly supported
+
+    .. staticmethod:: fromURL(inURL: typing.Union[str, URL]) -> typing.List
+
+        *This function is blocking*
+
+        Return a list of Overwatch.OWPatch objects parsed from inURL.
+
+        Default URL is Blizzard's Overwatch PC patch notes. Other URLs are not explicitly supported
+
     .. staticmethod:: getblizztrack(patchref:str) -> yarl.URL
 
         Build a ``yarl.URL`` object from a patch reference ID

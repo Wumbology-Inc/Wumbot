@@ -13,6 +13,7 @@ class NewsParser:
         self._parsername = None
         self._loadconverter = None
         self._saveconverter = None
+        self._comparator = None
 
     def loadposted(self):
         if self.logJSONpath.exists():

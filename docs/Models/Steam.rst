@@ -62,6 +62,8 @@ Class Reference
 
     .. staticmethod:: getnewsforapp(appID: int=582010, count: int=10, maxlength: int=300, format: str='json', **kwargs) -> typing.List
 
+        *This function is blocking*
+
         Return a list of ``mhw.SteamNewsPost`` objects for the specified ``appID``
 
         ``count`` specifies the number of posts to Return

@@ -19,7 +19,7 @@ setup(name='wumbot',
       description='A Python Discord bot for Wumbology, Inc.',
       long_description=readme,
       extras_require=extras_require,
-      python_requires='>=3.6.0',
+      python_requires='>=3.7.0',
       classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',

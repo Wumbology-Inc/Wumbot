@@ -45,7 +45,7 @@ class SteamNewsPost:
 
     @staticmethod
     async def asyncgetnewsforapp(
-        appID: int = 582_010,
+        appID: int = 582010,
         count: int = 10,
         maxlength: int = 300,
         format: str = "json",
@@ -77,7 +77,7 @@ class SteamNewsPost:
 
     @staticmethod
     def getnewsforapp(
-        appID: int = 582_010,
+        appID: int = 582010,
         count: int = 10,
         maxlength: int = 300,
         format: str = "json",

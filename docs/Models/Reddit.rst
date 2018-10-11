@@ -91,6 +91,8 @@ Class Reference
 
     .. staticmethod:: fromJSON(jsonURL: typing.Union[str, URL]=None, skipvalidation: bool=False) -> typing.List:
 
+        *This function is blocking*
+
         Return a list of ``Reddit.RedditPost`` objects from an input Reddit JSON URL
 
         Supported URL schemas are:
@@ -121,6 +123,8 @@ Class Reference
         Other input URL formats are not supported
 
     .. staticmethod:: fromURL(inURL: typing.Union[str, yarl.URL]=None) -> typing.List:
+
+        *This function is blocking*
 
         Return a list of ``reddit.RedditPost`` objects from an input Reddit URL
 
