@@ -14,19 +14,19 @@ from bot.models.Overwatch import OWPatch
 from bot.models.Reddit import RedditJSON, RedditPost, RedditPRAW
 
 
-class PatchGifParser(NewsParser):
+class PatchRundownParser(NewsParser):
     def __init__(self, bot):
         super().__init__(bot)
         self.postjsonURL = URL("https://www.reddit.com/user/itsjieyang/submitted.json")
         self.postchannelID = 477916849879908386
-        self.logJSONpath = Path("./log/postedGIFs.JSON")
+        self.logJSONpath = Path("./log/postedRundowns.JSON")
 
-        self._parsername = "OW GIF(s)"
+        self._parsername = "OW Rundown(s)"
         self._loadconverter = URL
         self._saveconverter = str
         self._comparator = "contentURL"
 
-    async def getpatchgifs(self, jsonURL: URL = None):
+    async def getpatchrundowns(self, jsonURL: URL = None):
         """
         Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
         """
@@ -45,7 +45,7 @@ class PatchGifParser(NewsParser):
 
         patchposts = []
         for postobj in postobjs:
-            # So far, patch notes GIFs we want are from /r/Overwatch and start with "patch"
+            # So far, patch notes rundowns we want are from /r/Overwatch and start with "patch"
             if postobj.subreddit == "Overwatch" and "patch" in postobj.title.lower():
                 patchposts.append(postobj)
 
@@ -98,7 +98,7 @@ class PatchGifParser(NewsParser):
             await postchannel.send(msg)
 
     async def patchcheck(self):
-        posts = await self.getpatchgifs()
+        posts = await self.getpatchrundowns()
         await super().patchcheck(posts)
 
     @staticmethod
@@ -168,11 +168,11 @@ class OverwatchCommands:
         self.bot = bot
 
     @commands.command()
-    async def checkOWgif(self, ctx: commands.Context):
+    async def checkOWrundown(self, ctx: commands.Context):
         await ManualCheck.check(
             ctx=ctx,
-            toinvoke=PatchGifParser(self.bot).patchcheck,
-            commandstr="OW Patch GIF",
+            toinvoke=PatchRundownParser(self.bot).patchcheck,
+            commandstr="OW Patch Rundown",
         )
 
     @commands.command()
