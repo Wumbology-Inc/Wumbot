@@ -62,6 +62,7 @@ class PatchRundownParser(NewsParser):
             * Youtube & Streamable: Use a regular message and defer to Discord's embed
         """
         channelID = channelID if channelID is not None else self.postchannelID
+        postchannel = self.bot.get_channel(channelID)
 
         host = postobj.contentURL.host.lower()
         if "gfycat.com" in host:
@@ -71,8 +72,6 @@ class PatchRundownParser(NewsParser):
                 raise TypeError(
                     f"Invalid post type provided: '{type(postobj)}', input must be RedditPost"
                 )
-
-            postchannel = self.bot.get_channel(channelID)
 
             postembed = discord.Embed(
                 title=postobj.title,

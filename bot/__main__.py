@@ -42,7 +42,7 @@ if credentials:
     # Setup event loops
     client.loop.create_task(wumbopresence.randWumboTimer(client, wumboJSON='./bot/wumbolist.JSON'))
     patchchecks = (
-        overwatch.PatchGifParser(client),
+        overwatch.PatchRundownParser(client),
         overwatch.PatchNotesParser(client),
         mhw.MHWNewsParser(client),
         rocketleague.RLNewsParser(client)
