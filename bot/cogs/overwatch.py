@@ -123,7 +123,7 @@ class PatchNotesParser(NewsParser):
         self._parsername = "OW Patch(es)"
         self._loadconverter = str
         self._saveconverter = str
-        self._comparator = "ver"
+        self._comparator = "verpatch"
 
     async def postembed(self, postobj: OWPatch = None, channelID: int = None):
         channelID = channelID if channelID is not None else self.postchannelID

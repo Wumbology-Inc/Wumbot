@@ -13,6 +13,7 @@ class OWPatch:
         self,
         patchref: str = None,
         ver: str = None,
+        verpatch: str = None,
         patchdate: datetime = None,
         patchURL: URL = None,
         bannerURL: URL = None,
@@ -28,11 +29,12 @@ class OWPatch:
         self.patchref = patchref
         self.ver = ver
         self.patchdate = patchdate
+        self.verpatch = verpatch
         self.patchURL = patchURL if patchURL is not None else defaultpatchURL
         self.bannerURL = bannerURL if bannerURL is not None else defaultbannerURL
 
     def __repr__(self):
-        return f"OWPatch: v{self.ver}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}"
+        return f"OWPatch: v{self.verpatch}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}"
 
     @staticmethod
     def fromURL(
@@ -88,6 +90,11 @@ class OWPatch:
             # Get version number from sidebar using patch reference ID
             sidebaritem = soup.select_one(f"a[href=#{patchref}]").parent
             ver = sidebaritem.find("h3").get_text().split()[-1]
+            
+            # Generate full reference from version number & patch reference because
+            # Blizzard reuses version numbers for some patches
+            # e.g. 1.29.0.1.51948 and 1.29.0.1.51575
+            verpatch = f"{ver}.{patchref_num}"
 
             # Get date
             dateheader = patch.find("h2", class_="HeadingBanner-header")
@@ -118,6 +125,7 @@ class OWPatch:
                 OWPatch(
                     patchref,
                     ver,
+                    verpatch,
                     patchdate,
                     OWPatch.getblizztrack(patchref_num),
                     patchbanner,
