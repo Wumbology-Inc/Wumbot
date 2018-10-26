@@ -28,7 +28,7 @@ Parser Reference
 
         ``List`` containing posted patch notes
 
-        Patches are stored as patch reference IDs, as ``str`` (e.g. ``'50148'``)
+        Patches are stored as patch version & ID, as ``str`` (e.g. ``'1.28.0.1.50148'``)
 
     .. comethod:: patchcheck
         :classmethod:

@@ -19,6 +19,12 @@ Class Reference
 
         e.g. ``'1.28.0.1'``
 
+    .. attribute:: verpatch(str)
+
+        Combined version & patch number
+
+        e.g. ``'1.28.0.1.50148'``
+
     .. attribute:: patchdate(datetime)
 
         Patch date (UTC)
