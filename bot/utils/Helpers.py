@@ -1,11 +1,13 @@
 import discord
 
+
 def isOwner(user: discord.User) -> bool:
     """
     Check to see if the input User's ID matches the Owner ID
     """
     ownerID = 129606635545952258
     return user.id == ownerID
+
 
 def isDM(channel: discord.TextChannel) -> bool:
     """
@@ -15,8 +17,9 @@ def isDM(channel: discord.TextChannel) -> bool:
     """
     return isinstance(channel, (discord.DMChannel, discord.GroupChannel))
 
+
 def isWumbologist(member: discord.Member) -> bool:
     """
     Check to see if a discord.Member has the 'Wumbologists' role
     """
-    return 'Wumbologists' in [str(role) for role in member.roles]
+    return "Wumbologists" in [str(role) for role in member.roles]

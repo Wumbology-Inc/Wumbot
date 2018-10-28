@@ -1,10 +1,9 @@
-import json
+import logging
 import re
 import typing
 
 import discord
 import requests
-from discord.ext import commands
 from yarl import URL
 
 
@@ -97,7 +96,7 @@ class Reddit:
     def _isvalidsubreddit(subreddit: str) -> bool:
         """
         Return True if subreddit resolves to a valid Reddit subreddit, else return False
-        
+
         If the JSON request times out or is API throttled, True is returned as a fallback
         """
         baseURL = URL("https://old.reddit.com/")
@@ -113,7 +112,7 @@ class Reddit:
             else:
                 logging.info(f"Unhandled Reddit response: '{msg}'")
                 return True
-        except KeyError as e:
+        except KeyError:
             return True
 
 

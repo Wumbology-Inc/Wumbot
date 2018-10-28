@@ -86,8 +86,8 @@ class RedditPRAW:
         # Try to get some submissions to check for correct authentication
         self.isauthenticated = True
         try:
-            _ = self.session.subreddit("python").hot(limit=1)
-        except praw.exceptions.ResponseException as e:
+            self.session.subreddit("python").hot(limit=1)
+        except praw.exceptions.ResponseException:
             self.isauthenticated = False
 
         if self.isauthenticated:
@@ -243,7 +243,7 @@ class RedditJSON:
         Perform some rudimentary Reddit URL validation for the class' methods
 
         Raises a ValueError if a URL is not provided or if a Reddit user link is provided that
-        is not the user's submissions. The checkJSON flag can be set to check whether the URL 
+        is not the user's submissions. The checkJSON flag can be set to check whether the URL
         suffix is .json
 
         Returns a yarl.URL if the checks pass

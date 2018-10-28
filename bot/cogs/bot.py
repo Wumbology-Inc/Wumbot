@@ -25,7 +25,7 @@ class MainCommands:
         repoGit = currRepo.git
         try:
             await ctx.message.channel.send(f"Current Version: {repoGit.describe()}")
-        except git.GitCommandError as err:
+        except git.GitCommandError:
             await ctx.send("No tags found on current branch")
 
     @commands.command()
@@ -75,7 +75,8 @@ class MainCommands:
 
         Command and any feedback are deleted after selfdestructdelay seconds
         """
-        # Assume last entry in args is the message ID and concatenate everything else into the message
+        # Assume last entry in args is the message ID
+        # Concatenate everything else into the message
         continueflag = False
         try:
             messageID = int(args[0])
@@ -144,7 +145,7 @@ class MainCommands:
         Return a dictionary mapping of alphabetical characters to their
         Unicode Regional Indicator Symbol Equivalent (1F1E6..1F1FF)
 
-        See: 
+        See:
             https://en.wikipedia.org/wiki/Regional_Indicator_Symbol
             https://www.unicode.org/charts/PDF/U1F100.pdf
         """

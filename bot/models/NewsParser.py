@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 import typing
-from pathlib import Path
 
 
 class NewsParser:

@@ -1,6 +1,4 @@
-import json
 import logging
-import re
 import typing
 from pathlib import Path
 
@@ -55,7 +53,7 @@ class PatchRundownParser(NewsParser):
 
     async def postembed(self, postobj: RedditPost = None, channelID: int = None):
         """
-        Generate & send an embed for the input RedditPost object, built from 
+        Generate & send an embed for the input RedditPost object, built from
         /u/itsjieyang's Reddit submissions.
 
         There are 2 message formats:

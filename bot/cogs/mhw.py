@@ -1,10 +1,7 @@
-import json
 import logging
 import typing
-from datetime import datetime
 from pathlib import Path
 
-import aiohttp
 import discord
 from discord.ext import commands
 from yarl import URL
