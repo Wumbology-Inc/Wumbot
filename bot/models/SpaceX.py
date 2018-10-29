@@ -9,24 +9,24 @@ class _SpaceXBase:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    @classmethod
-    async def _async_all_from_API(
-        cls: typing.Type, method: str = "", query: typing.Dict = {}
+    @staticmethod
+    async def _async_from_API(
+        endpoint: str = "", method: str = "", query: typing.Dict = {}
     ) -> typing.List:
-        r_json = await SpaceXAPI.async_get(cls.API_endpoint, method, query)[0]
+        r_json = await SpaceXAPI.async_get(endpoint, method, query)[0]
+
+        return _SpaceXBase._gen_obj_list(r_json)
+
+    @staticmethod
+    def _from_API(
+        endpoint: str = "", method: str = "", query: typing.Dict = {}
+    ) -> typing.List:
+        r_json = SpaceXAPI.get(endpoint, method, query)[0]
 
         return _SpaceXBase._gen_obj_list(r_json)
 
     @classmethod
-    def _all_from_API(
-        cls: typing.Type, method: str = "", query: typing.Dict = {}
-    ) -> typing.List:
-        r_json = SpaceXAPI.get(cls.API_endpoint, method, query)[0]
-
-        return _SpaceXBase._gen_obj_list(r_json)
-
-    @classmethod
-    def _gen_obj_list(cls, in_json) -> typing.List:
+    def _gen_obj_list(cls: typing.Type, in_json: typing.Dict) -> typing.List:
         objlist = []
         if isinstance(in_json, list):
             logging.info(f"{len(in_json)} objects retured by API")
@@ -70,10 +70,33 @@ class Capsule(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#d65a7f85-e0c7-41ce-b41d-9ad20a238d90
 
     """
+
     API_endpoint = "capsules"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    async def async_get_one(
+        cls: typing.Type, capsule_serial: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(
+            endpoint=API_endpoint, method=capsule_serial, query=query
+        )
+
+    @classmethod
+    def get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    def get_one(
+        cls: typing.Type, capsule_serial: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method=capsule_serial, query=query)
 
 
 class Core(_SpaceXBase):
@@ -108,10 +131,33 @@ class Core(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#1a1acb6e-0f15-437b-ae16-dcabf24dec9f
 
     """
+
     API_endpoint = "cores"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    async def async_get_one(
+        cls: typing.Type, core_serial: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(
+            endpoint=API_endpoint, method=core_serial, query=query
+        )
+
+    @classmethod
+    def get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    def get_one(
+        cls: typing.Type, core_serial: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method=core_serial, query=query)
 
 
 class Dragon(_SpaceXBase):
@@ -156,10 +202,29 @@ class Dragon(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#3d6e6f8a-a459-4265-84b1-e2b288a58537
 
     """
+
     API_endpoint = "dragons"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    async def async_get_one(
+        cls: typing.Type, id: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, method=id, query=query)
+
+    @classmethod
+    def get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    def get_one(cls: typing.Type, id: str, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method=id, query=query)
 
 
 class History(_SpaceXBase):
@@ -188,13 +253,32 @@ class History(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#ead57e9b-70db-432d-9923-4bf4b881cfd0
 
     """
+
     API_endpoint = "history"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
+    @classmethod
+    async def async_get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, query=query)
 
-class Info(_SpaceXBase):
+    @classmethod
+    async def async_get_one(
+        cls: typing.Type, id: int, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, method=id, query=query)
+
+    @classmethod
+    def get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    def get_one(cls: typing.Type, id: int, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method=id, query=query)
+
+
+class CompanyInfo(_SpaceXBase):
     """A class that represents SpaceX company info
 
     **Typical Attributes**
@@ -227,10 +311,19 @@ class Info(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#9b8b053e-cb75-400c-9635-5fe1c771d8a3
 
     """
+
     API_endpoint = "info"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_info(cls: typing.Type) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint)
+
+    @classmethod
+    def get_info(cls: typing.Type) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint)
 
 
 class APIInfo(_SpaceXBase):
@@ -258,10 +351,19 @@ class APIInfo(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#30c2d33b-4943-43ae-a98a-5ede3ece6388
 
     """
+
     API_endpoint = ""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_info(cls: typing.Type) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint)
+
+    @classmethod
+    def get_info(cls: typing.Type) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint)
 
 
 class Launch(_SpaceXBase):
@@ -302,10 +404,71 @@ class Launch(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#bc65ba60-decf-4289-bb04-4ca9df01b9c1
 
     """
+
     API_endpoint = "launches"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    async def async_get_one(
+        cls: typing.Type, flight_number: int, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(
+            endpoint=API_endpoint, method=flight_number, query=query
+        )
+
+    @classmethod
+    async def async_get_past(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, method="past", query=query)
+
+    @classmethod
+    async def async_get_upcoming(
+        cls: typing.Type, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(
+            endpoint=API_endpoint, method="upcoming", query=query
+        )
+
+    @classmethod
+    async def async_get_latest(
+        cls: typing.Type, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, method="latest")
+
+    @classmethod
+    async def async_get_next(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, method="next")
+
+    @classmethod
+    def get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    def get_one(
+        cls: typing.Type, flight_number: int, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method=flight_number, query=query)
+
+    @classmethod
+    async def get_past(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method="past", query=query)
+
+    @classmethod
+    async def get_upcoming(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method="upcoming", query=query)
+
+    @classmethod
+    async def get_latest(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method="latest")
+
+    @classmethod
+    async def get_next(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method="next")
 
 
 class Launchpad(_SpaceXBase):
@@ -334,10 +497,29 @@ class Launchpad(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#e232e64a-58a2-4bc0-af42-eb20499425cc
 
     """
+
     API_endpoint = "launchpads"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    async def async_get_one(
+        cls: typing.Type, site_id: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, method=site_id, query=query)
+
+    @classmethod
+    def get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    def get_one(cls: typing.Type, site_id: str, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method=site_id, query=query)
 
 
 class Mission(_SpaceXBase):
@@ -367,10 +549,33 @@ class Mission(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#9211ff07-9f81-41ac-9568-3018dd043e2a
 
     """
+
     API_endpoint = "missions"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    async def async_get_one(
+        cls: typing.Type, mission_id: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(
+            endpoint=API_endpoint, method=mission_id, query=query
+        )
+
+    @classmethod
+    def get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    def get_one(
+        cls: typing.Type, mission_id: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method=mission_id, query=query)
 
 
 class Payload(_SpaceXBase):
@@ -403,10 +608,33 @@ class Payload(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#2936485d-1d09-464c-a909-1c2041d67c75
 
     """
+
     API_endpoint = "payloads"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    async def async_get_one(
+        cls: typing.Type, payload_id: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(
+            endpoint=API_endpoint, method=payload_id, query=query
+        )
+
+    @classmethod
+    def get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    def get_one(
+        cls: typing.Type, payload_id: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method=payload_id, query=query)
 
 
 class Rocket(_SpaceXBase):
@@ -450,10 +678,31 @@ class Rocket(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#5fcdb875-914f-4aef-a932-254397cf147a
 
     """
+
     API_endpoint = "rockets"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    async def async_get_one(
+        cls: typing.Type, rocket_id: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, method=rocket_id, query=query)
+
+    @classmethod
+    def get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    def get_one(
+        cls: typing.Type, rocket_id: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method=rocket_id, query=query)
 
 
 class Roadster(_SpaceXBase):
@@ -499,10 +748,19 @@ class Roadster(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#46951cda-bdf2-481b-9697-118b1cbccaba
 
     """
+
     API_endpoint = "roadster"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_info(cls: typing.Type) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint)
+
+    @classmethod
+    def get_info(cls: typing.Type) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint)
 
 
 class Ship(_SpaceXBase):
@@ -547,7 +805,26 @@ class Ship(_SpaceXBase):
     .. _r/SpaceX-API v3 Docs: https://documenter.getpostman.com/view/2025350/RWaEzAiG#c7162816-0560-48ea-84ba-ed8ca4240647
 
     """
+
     API_endpoint = "ships"
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    @classmethod
+    async def async_get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    async def async_get_one(
+        cls: typing.Type, ship_id: str, query: typing.Dict = {}
+    ) -> typing.List:
+        return cls._async_from_API(endpoint=API_endpoint, method=ship_id, query=query)
+
+    @classmethod
+    def get_all(cls: typing.Type, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, query=query)
+
+    @classmethod
+    def get_one(cls: typing.Type, ship_id: str, query: typing.Dict = {}) -> typing.List:
+        return cls._from_API(endpoint=API_endpoint, method=ship_id, query=query)
