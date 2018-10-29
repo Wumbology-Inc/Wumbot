@@ -65,7 +65,7 @@ class SpaceXAPI:
 
     @staticmethod
     def _buildURL(
-        endpoint: str, method: str, baseURL: str = "https://api.spacexdata.com/v3"
+        endpoint: str = '', method: str = '', baseURL: str = "https://api.spacexdata.com/v3"
     ) -> str:
         """Build the SpaceX API Query URL, as :class:`str`
 
@@ -78,6 +78,14 @@ class SpaceXAPI:
         baseURL : str
             Base SpaceX API URL
 
-            Defaults to the V3 URL: https://api.spacexdata.com/v3/
+            Defaults to the V3 URL: ``https://api.spacexdata.com/v3/``
+
+        .. note::
+            If no endpoint is specified, return ``baseURL``
+
         """
+        if endpoint == '':
+            # Short circuit for when no endpoint is specified, which returns the API info
+            return baseURL
+
         return f"{baseURL}/{endpoint}/{method}"
