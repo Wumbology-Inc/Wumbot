@@ -64,7 +64,7 @@ class MainCommands:
                 f"{ctx.message.author.mention}, you are not authorized to perform this operation"
             )
 
-    @commands.command()
+    @commands.command(name="reactmessage", aliases=("react",))
     async def reactmessage(
         self, ctx: commands.Context, *args, selfdestructdelay: int = 10
     ):
@@ -121,11 +121,11 @@ class MainCommands:
                     continueflag = True
                 except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                     continue
-                finally:
-                    if not messageObj:
-                        feedbackmsg = await ctx.send(
-                            f"Message ID '{messageID}' could not be obtained"
-                        )
+
+        if not messageObj:
+            feedbackmsg = await ctx.send(
+                f"Message ID '{messageID}' could not be obtained"
+            )
 
         if continueflag:
             async with foundchannel.typing():
