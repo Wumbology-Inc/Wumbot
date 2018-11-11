@@ -32,7 +32,10 @@ def loadCredentials(credentialJSON) -> str:
 credentialpath = "./credentials.JSON"
 credentials = loadCredentials(credentialpath)
 if credentials:
-    client = WumbotClient(command_prefix="~")
+    client = WumbotClient(
+        command_prefix=commands.when_mentioned_or("~"),
+        case_insensitive=True
+        )
 
     # Load cogs
     client.load_extension("bot.cogs.bot")
