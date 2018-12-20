@@ -25,7 +25,7 @@ class MainCommands:
         repoGit = currRepo.git
         try:
             await ctx.message.channel.send(f"Current Version: {repoGit.describe()}")
-        except git.GitCommandError as err:
+        except git.GitCommandError:
             await ctx.send("No tags found on current branch")
 
     @commands.command()
@@ -64,7 +64,7 @@ class MainCommands:
                 f"{ctx.message.author.mention}, you are not authorized to perform this operation"
             )
 
-    @commands.command()
+    @commands.command(name="reactmessage", aliases=("react",))
     async def reactmessage(
         self, ctx: commands.Context, *args, selfdestructdelay: int = 10
     ):
@@ -75,7 +75,8 @@ class MainCommands:
 
         Command and any feedback are deleted after selfdestructdelay seconds
         """
-        # Assume last entry in args is the message ID and concatenate everything else into the message
+        # Assume last entry in args is the message ID
+        # Concatenate everything else into the message
         continueflag = False
         try:
             messageID = int(args[0])
@@ -120,11 +121,11 @@ class MainCommands:
                     continueflag = True
                 except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                     continue
-                finally:
-                    if not messageObj:
-                        feedbackmsg = await ctx.send(
-                            f"Message ID '{messageID}' could not be obtained"
-                        )
+
+        if not messageObj:
+            feedbackmsg = await ctx.send(
+                f"Message ID '{messageID}' could not be obtained"
+            )
 
         if continueflag:
             async with foundchannel.typing():
@@ -144,7 +145,7 @@ class MainCommands:
         Return a dictionary mapping of alphabetical characters to their
         Unicode Regional Indicator Symbol Equivalent (1F1E6..1F1FF)
 
-        See: 
+        See:
             https://en.wikipedia.org/wiki/Regional_Indicator_Symbol
             https://www.unicode.org/charts/PDF/U1F100.pdf
         """

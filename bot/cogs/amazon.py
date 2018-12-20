@@ -1,11 +1,7 @@
-import logging
 import re
 
-import discord
-from discord.ext import commands    
 
-
-class Amazon():
+class Amazon:
     def __init__(self, bot):
         self.bot = bot
 
@@ -15,9 +11,19 @@ class Amazon():
             return
 
         # Check for "regular" Amazon link, capture full link & ASIN
-        testAmazonASIN = re.search(r'https?.*\/\/.+\.amazon\..+\/([A-Z0-9]{10})\/\S*', message.content, flags=re.IGNORECASE)
+        testAmazonASIN = re.search(
+            r"https?.*\/\/.+\.amazon\..+\/([A-Z0-9]{10})\/\S*",
+            message.content,
+            flags=re.IGNORECASE,
+        )
         # Check for shortened Amazon link (https://a.co/*), capture full link
-        testAmazonShort = re.search(r'https?:\/\/a\.co\S*', message.content, flags=re.IGNORECASE)
+        testAmazonShort = re.search(
+            r"https?:\/\/a\.co\S*", message.content, flags=re.IGNORECASE
+        )
+
+        if testAmazonASIN or testAmazonShort:
+            raise NotImplementedError
+
 
 def setup(bot):
     bot.add_cog(Amazon(bot))

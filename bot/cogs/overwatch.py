@@ -1,6 +1,4 @@
-import json
 import logging
-import re
 import typing
 from pathlib import Path
 
@@ -12,13 +10,14 @@ from bot.models.ManualCheck import ManualCheck
 from bot.models.NewsParser import NewsParser
 from bot.models.Overwatch import OWPatch
 from bot.models.Reddit import RedditJSON, RedditPost, RedditPRAW
+from bot.utils.Constants import Channels
 
 
 class PatchRundownParser(NewsParser):
     def __init__(self, bot):
         super().__init__(bot)
         self.postjsonURL = URL("https://www.reddit.com/user/itsjieyang/submitted.json")
-        self.postchannelID = 477916849879908386
+        self.postchannelID = Channels.ow
         self.logJSONpath = Path("./log/postedRundowns.JSON")
 
         self._parsername = "OW Rundown(s)"
@@ -54,7 +53,7 @@ class PatchRundownParser(NewsParser):
 
     async def postembed(self, postobj: RedditPost = None, channelID: int = None):
         """
-        Generate & send an embed for the input RedditPost object, built from 
+        Generate & send an embed for the input RedditPost object, built from
         /u/itsjieyang's Reddit submissions.
 
         There are 2 message formats:
@@ -117,7 +116,7 @@ class PatchNotesParser(NewsParser):
     def __init__(self, bot):
         super().__init__(bot)
         self.patchesURL = URL("https://playoverwatch.com/en-us/news/patch-notes/pc")
-        self.postchannelID = 477916849879908386
+        self.postchannelID = Channels.ow
         self.logJSONpath = Path("./log/postedOWpatches.JSON")
 
         self._parsername = "OW Patch(es)"

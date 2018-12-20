@@ -1,10 +1,7 @@
-import json
 import logging
 import typing
-from datetime import datetime
 from pathlib import Path
 
-import aiohttp
 import discord
 from discord.ext import commands
 from yarl import URL
@@ -12,12 +9,13 @@ from yarl import URL
 from bot.models.ManualCheck import ManualCheck
 from bot.models.NewsParser import NewsParser
 from bot.models.Steam import SteamNewsPost
+from bot.utils.Constants import Channels
 
 
 class MHWNewsParser(NewsParser):
     def __init__(self, bot):
         super().__init__(bot)
-        self.postchannelID = 478568995767713793
+        self.postchannelID = Channels.mhw
         self.logJSONpath = Path("./log/postedMHWnews.JSON")
         self.appID = 582010
         self.officialaccount = "MHW_CAPCOM"

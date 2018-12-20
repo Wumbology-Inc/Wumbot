@@ -15,23 +15,28 @@ class WumbotClient(commands.Bot):
 
     async def on_ready(self):
         self.launch_time = datetime.utcnow()
-        logging.info(f'Logged in as {self.user}')
-        print(f'Logged in as {self.user}')  # Keep print statement for dev debugging
+        logging.info(f"Logged in as {self.user}")
+        print(f"Logged in as {self.user}")  # Keep print statement for dev debugging
+
 
 def loadCredentials(credentialJSON) -> str:
     """
     Load login credentials from the input JSON file
     """
-    with open(credentialJSON, mode='r') as fID:
+    with open(credentialJSON, mode="r") as fID:
         credentials = json.load(fID)
 
-    return credentials['DiscordToken']
+    return credentials["DiscordToken"]
 
-credentialpath = './credentials.JSON'
+
+credentialpath = "./credentials.JSON"
 credentials = loadCredentials(credentialpath)
 if credentials:
-    client = WumbotClient(command_prefix='~')
-    
+    client = WumbotClient(
+        command_prefix=commands.when_mentioned_or("~"),
+        case_insensitive=True
+        )
+
     # Load cogs
     client.load_extension("bot.cogs.bot")
     client.load_extension("bot.cogs.reddit")
@@ -40,12 +45,14 @@ if credentials:
     client.load_extension("bot.cogs.rocketleague")
 
     # Setup event loops
-    client.loop.create_task(wumbopresence.randWumboTimer(client, wumboJSON='./bot/wumbolist.JSON'))
+    client.loop.create_task(
+        wumbopresence.randWumboTimer(client, wumboJSON="./bot/wumbolist.JSON")
+    )
     patchchecks = (
         overwatch.PatchRundownParser(client),
         overwatch.PatchNotesParser(client),
         mhw.MHWNewsParser(client),
-        rocketleague.RLNewsParser(client)
+        rocketleague.RLNewsParser(client),
     )
     client.loop.create_task(patchchecktimer(client, patchchecks))
 

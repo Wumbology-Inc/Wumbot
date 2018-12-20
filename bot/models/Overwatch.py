@@ -85,12 +85,13 @@ class OWPatch:
         for patch in patches:
             # Get patch reference ID
             patchref = patch.get("id")
-            patchref_num = patchref.split("-")[-1]  # Get numeric reference to build BlizzTrack link later
+            # Get numeric reference to build BlizzTrack link later
+            patchref_num = patchref.split("-")[-1]
 
             # Get version number from sidebar using patch reference ID
             sidebaritem = soup.select_one(f"a[href=#{patchref}]").parent
             ver = sidebaritem.find("h3").get_text().split()[-1]
-            
+
             # Generate full reference from version number & patch reference because
             # Blizzard reuses version numbers for some patches
             # e.g. 1.29.0.1.51948 and 1.29.0.1.51575
@@ -138,7 +139,7 @@ class OWPatch:
     def getblizztrack(patchref: str = None) -> URL:
         """
         Return BlizzTrack URL to patch notes, built using Blizzard's patchref
-        
+
         e.g. https://blizztrack.com/patch_notes/overwatch/50148
         """
         if not patchref:

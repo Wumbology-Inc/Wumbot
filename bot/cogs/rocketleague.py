@@ -1,4 +1,3 @@
-import json
 import logging
 import typing
 from pathlib import Path
@@ -10,12 +9,13 @@ from yarl import URL
 from bot.models.ManualCheck import ManualCheck
 from bot.models.NewsParser import NewsParser
 from bot.models.Steam import SteamNewsPost
+from bot.utils.Constants import Channels
 
 
 class RLNewsParser(NewsParser):
     def __init__(self, bot):
         super().__init__(bot)
-        self.postchannelID = 494682432688226316
+        self.postchannelID = Channels.rl
         self.logJSONpath = Path("./log/postedRLnews.JSON")
         self.appID = 252950
         self.psyonixstaff = ("dirkened", "psyonix devin")
