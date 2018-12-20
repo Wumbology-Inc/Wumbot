@@ -109,7 +109,7 @@ class PatchRundownParser(NewsParser):
         Returns a string
         """
         gfyID = URL(inURL).path.replace("/", "")
-        return URL.build(scheme="https", host="giant.gfycat.com", path=f"{gfyID}.gif")
+        return URL.build(scheme="https", host="giant.gfycat.com", path=f"/{gfyID}.gif")
 
 
 class PatchNotesParser(NewsParser):
