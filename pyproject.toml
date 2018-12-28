@@ -1,0 +1,43 @@
+[tool.poetry]
+name = "wumbot"
+version = "0.10.6"
+description = "A Python Discord bot for Wumbology, Inc."
+authors = ["sco1 <sco1.git@gmail.com>"]
+
+readme = "README.md"
+homepage = "https://github.com/Wumbology-Inc"
+repository = "https://github.com/Wumbology-Inc/Wumbot"
+documentation = "https://wumbot.readthedocs.io/en/stable/"
+classifiers = [
+    'Development Status :: 4 - Beta',
+    'Intended Audience :: Developers',
+    'Natural Language :: English',
+    'Operating System :: OS Independent',
+    'Programming Language :: Python :: 3 :: Only',
+    'Programming Language :: Python :: 3.7',
+    'Topic :: Communications :: Chat',
+    'Topic :: Internet'
+]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+GitPython = "^2.1"
+docker = "^3.6"
+beautifulsoup4 = "^4.6"
+requests = "^2.21"
+praw = "^6.0"
+"discord.py" = { git = "https://github.com/Rapptz/discord.py.git", branch = "rewrite" }
+
+[tool.poetry.dev-dependencies]
+flake8 = "^3.6"
+black = {version = "*", allows-prereleases=true}
+pre-commit = { git = "https://github.com/pre-commit/pre-commit.git" }
+
+# Docs
+sphinx = { git = "https://github.com/sphinx-doc/sphinx.git" }
+sphinxcontrib-asyncio = { git = "https://github.com/aio-libs/sphinxcontrib-asyncio.git" }
+sphinxcontrib-websupport = { git = "https://github.com/sphinx-doc/sphinxcontrib-websupport.git"}
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
