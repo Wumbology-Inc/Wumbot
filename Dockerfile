@@ -10,11 +10,13 @@ RUN set -ex && mkdir /app
 WORKDIR /app
 ADD . /app
 
+COPY logzio.conf logzio.conf
 COPY credentials.JSON credentials.JSON
 COPY pyproject.toml pyproject.toml
 COPY poetry.lock poetry.lock
-RUN pip install poetry
-RUN poetry install --no-dev
+RUN python3 -m pip install poetry
+RUN python3 -m poetry config settings.virtualenvs.create false
+RUN python3 -m poetry install --no-dev
 
 RUN apk del .pynacl_deps
 
