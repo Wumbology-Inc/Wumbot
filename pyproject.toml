@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "wumbot"
-version = "0.10.6"
+version = "0.11.1"
 description = "A Python Discord bot for Wumbology, Inc."
 authors = ["sco1 <sco1.git@gmail.com>"]
 
