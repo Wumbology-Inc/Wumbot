@@ -11,8 +11,10 @@ WORKDIR /app
 ADD . /app
 
 COPY credentials.JSON credentials.JSON
-COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
+COPY pyproject.toml pyproject.toml
+COPY poetry.lock poetry.lock
+RUN pip install poetry
+RUN poetry install --no-dev
 
 RUN apk del .pynacl_deps
 

@@ -1,6 +1,7 @@
 # No sharing secret passwords...
 credentials.JSON
 .env
+logzio.conf
 
 # Caches
 .vscode/
