@@ -34,7 +34,7 @@ class OWPatch:
         self.bannerURL = bannerURL if bannerURL is not None else defaultbannerURL
 
     def __repr__(self):
-        return f"OWPatch: v{self.verpatch}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}"
+        return f"OWPatch: v{self.verpatch}, Released: {datetime.strftime(self.patchdate, '%Y-%m-%d')}"  # noqa
 
     @staticmethod
     def fromURL(
@@ -89,7 +89,7 @@ class OWPatch:
             patchref_num = patchref.split("-")[-1]
 
             # Get version number from sidebar using patch reference ID
-            sidebaritem = soup.select_one(f"a[href=#{patchref}]").parent
+            sidebaritem = soup.find("a", href=re.compile(f"#{patchref}")).parent
             ver = sidebaritem.find("h3").get_text().split()[-1]
 
             # Generate full reference from version number & patch reference because
@@ -102,14 +102,17 @@ class OWPatch:
             if dateheader:
                 patchdate = datetime.strptime(dateheader.get_text(), "%B %d, %Y")
             else:
-                # In the event there is no banner, the date is instead embedded in <h1>Overwatch Patch Notes – June 5, 2018</h1>
-                # Since we already have the sidebar entry, it's slightly simpler to get the date from that instead
+                # In the event there is no banner, the date is instead embedded in
+                # <h1>Overwatch Patch Notes – June 5, 2018</h1>
+                # Since we already have the sidebar entry, it's slightly simpler to get the date
+                # from that instead
                 patchdate = datetime.strptime(
                     sidebaritem.find("p").get_text(), "%m/%d/%Y"
                 )
 
             # Get patch banner
-            # If there is a banner for the patch, it's embedded in the 'style' portion of the '.HeadingBanner' div
+            # If there is a banner for the patch, it's embedded in the 'style' portion of the
+            # '.HeadingBanner' div
             # e.g. <div class="HeadingBanner" style="background-image: url(https://link/to.jpg);">
             patchbannerdiv = patch.select_one(".HeadingBanner")
             if patchbannerdiv:
