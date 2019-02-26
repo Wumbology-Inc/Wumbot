@@ -27,7 +27,8 @@ class PatchRundownParser(NewsParser):
 
     async def getpatchrundowns(self, jsonURL: URL = None):
         """
-        Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
+        Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang
+        to /r/Overwatch
         """
         jsonURL = jsonURL if jsonURL is not None else self.postjsonURL
 
@@ -75,7 +76,10 @@ class PatchRundownParser(NewsParser):
             postembed = discord.Embed(
                 title=postobj.title,
                 color=discord.Color(0x9C4AF7),
-                description=f"[View Full Resolution]({postobj.contentURL})\n\n[View Reddit Post]({postobj.permalink})",
+                description=(
+                    f"[View Full Resolution]({postobj.contentURL})\n\n"
+                    f"[View Reddit Post]({postobj.permalink})"
+                ),
             )
             postembed.set_author(
                 name="/u/itsjieyang", url=URL("https://www.reddit.com/user/itsjieyang")
@@ -104,7 +108,9 @@ class PatchRundownParser(NewsParser):
         """
         Build a direct gif link from a gfycat URL
 
-        e.g. https://gfycat.com/flippantvariablediplodocus -> https://giant.gfycat.com/FlippantVariableDiplodocus.gif
+        e.g. https://gfycat.com/flippantvariablediplodocus
+             to
+             https://giant.gfycat.com/FlippantVariableDiplodocus.gif
 
         Returns a string
         """

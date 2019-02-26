@@ -40,7 +40,10 @@ class SteamNewsPost:
         self.appid = appid
 
     def __repr__(self):
-        return f"<SteamNews> \"{self.title}\" Posted {datetime.strftime(self.date, '%Y-%m-%d')} by {self.author}"
+        return (
+            f"<SteamNews> \"{self.title}\" Posted {datetime.strftime(self.date, '%Y-%m-%d')} "
+            f"by {self.author}"
+        )
 
     @staticmethod
     async def asyncgetnewsforapp(

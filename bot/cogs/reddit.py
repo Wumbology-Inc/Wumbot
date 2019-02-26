@@ -45,7 +45,10 @@ class Reddit:
             if len(subredditlist) > embedlimit:
                 embed.add_field(
                     name="Note:",
-                    value=f"For brevity, only {embedlimit} subreddits have been embedded. You linked {len(subredditlist)}",
+                    value=(
+                        f"For brevity, only {embedlimit} subreddits have been embedded. "
+                        f"You linked {len(subredditlist)}"
+                    ),
                 )
 
         return embed

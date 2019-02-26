@@ -17,7 +17,7 @@ class MHWNewsParser(NewsParser):
         super().__init__(bot)
         self.postchannelID = Channels.mhw
         self.logJSONpath = Path("./log/postedMHWnews.JSON")
-        self.appID = 582010
+        self.appID = 582_010
         self.officialaccount = "MHW_CAPCOM"
 
         self._parsername = "MHW News"
@@ -62,7 +62,7 @@ class MHWNewsParser(NewsParser):
             name="Capcom",
             url=URL("https://steamcommunity.com/app/582010/announcements/"),
             icon_url=URL(
-                "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Capcom_logo.svg/320px-Capcom_logo.svg"
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/e/ef/Capcom_logo.svg/320px-Capcom_logo.svg"  # noqa
             ),
         )
         postembed.set_thumbnail(
@@ -71,7 +71,7 @@ class MHWNewsParser(NewsParser):
         postembed.set_footer(
             text="Brought to you by Palico power!",
             icon_url=URL(
-                "https://cdn.discordapp.com/attachments/417527786614554638/487788870193381387/s-l300.png"
+                "https://cdn.discordapp.com/attachments/417527786614554638/487788870193381387/s-l300.png"  # noqa
             ),
         )
         await postchannel.send(

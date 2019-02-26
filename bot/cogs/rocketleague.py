@@ -17,7 +17,7 @@ class RLNewsParser(NewsParser):
         super().__init__(bot)
         self.postchannelID = Channels.rl
         self.logJSONpath = Path("./log/postedRLnews.JSON")
-        self.appID = 252950
+        self.appID = 252_950
         self.psyonixstaff = ("dirkened", "psyonix devin")
 
         self._parsername = "RL News"
@@ -62,18 +62,18 @@ class RLNewsParser(NewsParser):
             name=postobj.author,
             url=URL("https://steamcommunity.com/app/252950/announcements/"),
             icon_url=URL(
-                "https://cdn.discordapp.com/attachments/417527786614554638/494692091453112320/unknown.png"
+                "https://cdn.discordapp.com/attachments/417527786614554638/494692091453112320/unknown.png"  # noqa
             ),
         )
         postembed.set_thumbnail(
             url=URL(
-                "https://media.discordapp.net/attachments/417527786614554638/494691204248764416/timthumb.png"
+                "https://media.discordapp.net/attachments/417527786614554638/494691204248764416/timthumb.png"  # noqa
             )
         )
         postembed.set_footer(
             text="What a save! What a save! What a save!",
             icon_url=URL(
-                "https://cdn.discordapp.com/attachments/417527786614554638/494690857379692564/unknown.png"
+                "https://cdn.discordapp.com/attachments/417527786614554638/494690857379692564/unknown.png"  # noqa
             ),
         )
         await postchannel.send(
