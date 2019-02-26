@@ -26,8 +26,8 @@ docker = "^3.6"
 beautifulsoup4 = "^4.6"
 requests = "^2.21"
 praw = "^6.0"
-logzio-python-handler = "^2.0"
 "discord.py" = { git = "https://github.com/Rapptz/discord.py.git", branch = "rewrite" }
+sentry-sdk = "^0.7.4"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^3.6"
