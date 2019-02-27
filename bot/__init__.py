@@ -7,7 +7,7 @@ import sentry_sdk
 
 with open("./credentials.JSON", "r") as f:
     _tmp = json.load(f)
-    SENTRY_ENDPOINT = getattr(_tmp, "SENTRY_ENDPOINT", None)
+    SENTRY_ENDPOINT = _tmp.get("SENTRY_ENDPOINT", None)
 
 if SENTRY_ENDPOINT:
     sentry_sdk.init(SENTRY_ENDPOINT)
