@@ -54,8 +54,8 @@ class PatchRundownParser(NewsParser):
 
     async def postembed(self, postobj: RedditPost = None, channelID: int = None):
         """
-        Generate & send an embed for the input RedditPost object, built from
-        /u/itsjieyang's Reddit submissions.
+        Generate & send an embed for the input RedditPost object, built from /u/itsjieyang's
+        Reddit submissions
 
         There are 2 message formats:
             * Gfycat: Generate an embed with the .gif version of the gfy embedded
@@ -167,11 +167,11 @@ class PatchNotesParser(NewsParser):
         await super().patchcheck(posts)
 
 
-class OverwatchCommands:
+class OverwatchCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def checkOWrundown(self, ctx: commands.Context):
         await ManualCheck.check(
             ctx=ctx,
@@ -179,7 +179,7 @@ class OverwatchCommands:
             commandstr="OW Patch Rundown",
         )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def checkOWpatch(self, ctx: commands.Context):
         await ManualCheck.check(
             ctx=ctx,

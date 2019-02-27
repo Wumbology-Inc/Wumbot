@@ -99,11 +99,11 @@ class RLNewsParser(NewsParser):
             return True
 
 
-class RocketLeagueCommands:
+class RocketLeagueCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def checkRLpatch(self, ctx: commands.Context):
         await ManualCheck.check(
             ctx=ctx, toinvoke=RLNewsParser(self.bot).patchcheck, commandstr="RL news"

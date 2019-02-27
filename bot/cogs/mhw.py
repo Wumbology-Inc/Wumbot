@@ -95,11 +95,11 @@ class MHWNewsParser(NewsParser):
             return True
 
 
-class MHWCommands:
+class MHWCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def checkMHWpatch(self, ctx: commands.Context):
         await ManualCheck.check(
             ctx=ctx, toinvoke=MHWNewsParser(self.bot).patchcheck, commandstr="MHW news"
