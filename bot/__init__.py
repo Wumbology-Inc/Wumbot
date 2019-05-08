@@ -1,14 +1,16 @@
+import json
 import logging
-import logging.config
 import time
-from pathlib import Path
+
+import sentry_sdk
 
 
-LOGZIO_CONF_PATH = Path('./logzio.conf')
+with open("./credentials.JSON", "r") as f:
+    _tmp = json.load(f)
+    SENTRY_ENDPOINT = _tmp.get("SENTRY_ENDPOINT", None)
 
-if LOGZIO_CONF_PATH.exists():
-    logging.config.fileConfig('logzio.conf')
-    logger = logging.getLogger('LogzioLogger')
+if SENTRY_ENDPOINT:
+    sentry_sdk.init(SENTRY_ENDPOINT)
 else:
     # Default to local logging
     logging.Formatter.converter = time.gmtime  # Force UTC

@@ -4,10 +4,11 @@ import typing
 
 import discord
 import requests
+from discord.ext import commands
 from yarl import URL
 
 
-class Reddit:
+class Reddit(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -45,17 +46,21 @@ class Reddit:
             if len(subredditlist) > embedlimit:
                 embed.add_field(
                     name="Note:",
-                    value=f"For brevity, only {embedlimit} subreddits have been embedded. You linked {len(subredditlist)}",
+                    value=(
+                        f"For brevity, only {embedlimit} subreddits have been embedded. "
+                        f"You linked {len(subredditlist)}"
+                    ),
                 )
 
         return embed
 
+    @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         """
         Check messages for:
 
-           1. Subreddit reference (/r/subreddit) and reply with a link embed
-              Invalid subreddits are ignored
+           1. Subreddit reference (/r/subreddit) and reply with a link embed. Invalid subreddits
+              are ignored
            2. Reddit's image/video hosting adding 'DashPlaylist.mpd' to the end of the file, which
               links to nothing. Reply with a link embed to the media without the suffix
         """

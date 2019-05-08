@@ -1,12 +1,8 @@
 import json
 import logging
-import time
 from datetime import datetime
 
 from discord.ext import commands
-
-from bot.cogs import mhw, overwatch, rocketleague, wumbopresence
-from bot.models.NewsParser import patchchecktimer
 
 
 class WumbotClient(commands.Bot):
@@ -33,28 +29,14 @@ credentialpath = "./credentials.JSON"
 credentials = loadCredentials(credentialpath)
 if credentials:
     client = WumbotClient(
-        command_prefix=commands.when_mentioned_or("~"),
-        case_insensitive=True
-        )
+        command_prefix=commands.when_mentioned_or("~"), case_insensitive=True
+    )
 
     # Load cogs
     client.load_extension("bot.cogs.bot")
     client.load_extension("bot.cogs.reddit")
     client.load_extension("bot.cogs.overwatch")
-    client.load_extension("bot.cogs.mhw")
-    client.load_extension("bot.cogs.rocketleague")
-
-    # Setup event loops
-    client.loop.create_task(
-        wumbopresence.randWumboTimer(client, wumboJSON="./bot/wumbolist.JSON")
-    )
-    patchchecks = (
-        overwatch.PatchRundownParser(client),
-        overwatch.PatchNotesParser(client),
-        mhw.MHWNewsParser(client),
-        rocketleague.RLNewsParser(client),
-    )
-    client.loop.create_task(patchchecktimer(client, patchchecks))
+    client.load_extension("bot.cogs.wumbopresence")
 
     # Finally, try to log in
     client.run(credentials)

@@ -10,7 +10,7 @@ from discord.ext import commands
 from bot.utils import Helpers
 
 
-class MainCommands:
+class MainCommands(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -41,7 +41,7 @@ class MainCommands:
             f"Wumbot has been up for: {days}d {hours}h {minutes}m {seconds}s"
         )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def kill(self, ctx: commands.Context):
         """
         Disconnect bot from Discord
@@ -142,8 +142,8 @@ class MainCommands:
     @staticmethod
     def _buildletterunicode():
         """
-        Return a dictionary mapping of alphabetical characters to their
-        Unicode Regional Indicator Symbol Equivalent (1F1E6..1F1FF)
+        Return a dictionary mapping of alphabetical characters to their Unicode Regional Indicator
+        Symbol Equivalent (1F1E6..1F1FF)
 
         See:
             https://en.wikipedia.org/wiki/Regional_Indicator_Symbol

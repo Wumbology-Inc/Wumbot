@@ -3,7 +3,7 @@ import typing
 from pathlib import Path
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from yarl import URL
 
 from bot.models.ManualCheck import ManualCheck
@@ -27,7 +27,8 @@ class PatchRundownParser(NewsParser):
 
     async def getpatchrundowns(self, jsonURL: URL = None):
         """
-        Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang to /r/Overwatch
+        Return a list of RedditPost objects generated from Patch Notes submissions by /u/itsjieyang
+        to /r/Overwatch
         """
         jsonURL = jsonURL if jsonURL is not None else self.postjsonURL
 
@@ -53,8 +54,8 @@ class PatchRundownParser(NewsParser):
 
     async def postembed(self, postobj: RedditPost = None, channelID: int = None):
         """
-        Generate & send an embed for the input RedditPost object, built from
-        /u/itsjieyang's Reddit submissions.
+        Generate & send an embed for the input RedditPost object, built from /u/itsjieyang's
+        Reddit submissions
 
         There are 2 message formats:
             * Gfycat: Generate an embed with the .gif version of the gfy embedded
@@ -75,7 +76,10 @@ class PatchRundownParser(NewsParser):
             postembed = discord.Embed(
                 title=postobj.title,
                 color=discord.Color(0x9C4AF7),
-                description=f"[View Full Resolution]({postobj.contentURL})\n\n[View Reddit Post]({postobj.permalink})",
+                description=(
+                    f"[View Full Resolution]({postobj.contentURL})\n\n"
+                    f"[View Reddit Post]({postobj.permalink})"
+                ),
             )
             postembed.set_author(
                 name="/u/itsjieyang", url=URL("https://www.reddit.com/user/itsjieyang")
@@ -104,7 +108,9 @@ class PatchRundownParser(NewsParser):
         """
         Build a direct gif link from a gfycat URL
 
-        e.g. https://gfycat.com/flippantvariablediplodocus -> https://giant.gfycat.com/FlippantVariableDiplodocus.gif
+        e.g. https://gfycat.com/flippantvariablediplodocus
+             to
+             https://giant.gfycat.com/FlippantVariableDiplodocus.gif
 
         Returns a string
         """
@@ -161,11 +167,28 @@ class PatchNotesParser(NewsParser):
         await super().patchcheck(posts)
 
 
-class OverwatchCommands:
+class OverwatchHelper(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+        self.rundown_parser = PatchRundownParser(self.bot)
+        self.patch_parser = PatchNotesParser(self.bot)
+        self.overwatch_patch_check_timer.start()
+
+    def cog_unload(self):
+        self.overwatch_patch_check_timer.cancel()
+
+    @tasks.loop(hours=1)
+    async def overwatch_patch_check_timer(self):
+        """Task loop for fetching OW game updates"""
+        await self.rundown_parser.patchcheck()
+        await self.patch_parser.patchcheck()
+
+    @overwatch_patch_check_timer.before_loop
+    async def before_patch_check(self):
+        await self.bot.wait_until_ready()
+
+    @commands.command(hidden=True)
     async def checkOWrundown(self, ctx: commands.Context):
         await ManualCheck.check(
             ctx=ctx,
@@ -173,7 +196,7 @@ class OverwatchCommands:
             commandstr="OW Patch Rundown",
         )
 
-    @commands.command()
+    @commands.command(hidden=True)
     async def checkOWpatch(self, ctx: commands.Context):
         await ManualCheck.check(
             ctx=ctx,
@@ -183,4 +206,5 @@ class OverwatchCommands:
 
 
 def setup(bot):
-    bot.add_cog(OverwatchCommands(bot))
+    bot.add_cog(OverwatchHelper(bot))
+    logging.info("OverwatchHelper Cog loaded")
