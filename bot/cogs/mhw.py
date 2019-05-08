@@ -107,4 +107,5 @@ class MHWCommands(commands.Cog):
 
 
 def setup(bot):
+    raise DeprecationWarning("The MHW cog has been deprecated.")
     bot.add_cog(MHWCommands(bot))

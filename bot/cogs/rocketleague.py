@@ -111,4 +111,5 @@ class RocketLeagueCommands(commands.Cog):
 
 
 def setup(bot):
+    raise DeprecationWarning("The RocketLeague cog has been deprecated.")
     bot.add_cog(RocketLeagueCommands(bot))
