@@ -3,7 +3,7 @@ import typing
 from pathlib import Path
 
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 from yarl import URL
 
 from bot.models.ManualCheck import ManualCheck
@@ -167,9 +167,26 @@ class PatchNotesParser(NewsParser):
         await super().patchcheck(posts)
 
 
-class OverwatchCommands(commands.Cog):
+class OverwatchHelper(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+
+        self.rundown_parser = PatchRundownParser(self.bot)
+        self.patch_parser = PatchNotesParser(self.bot)
+        self.overwatch_patch_check_timer.start()
+
+    def cog_unload(self):
+        self.overwatch_patch_check_timer.cancel()
+
+    @tasks.loop(hours=1)
+    async def overwatch_patch_check_timer(self):
+        """Task loop for fetching OW game updates"""
+        await self.rundown_parser.patchcheck()
+        await self.patch_parser.patchcheck()
+
+    @overwatch_patch_check_timer.before_loop
+    async def before_patch_check(self):
+        await self.bot.wait_until_ready()
 
     @commands.command(hidden=True)
     async def checkOWrundown(self, ctx: commands.Context):
@@ -189,4 +206,5 @@ class OverwatchCommands(commands.Cog):
 
 
 def setup(bot):
-    bot.add_cog(OverwatchCommands(bot))
+    bot.add_cog(OverwatchHelper(bot))
+    logging.info("OverwatchHelper Cog loaded")
