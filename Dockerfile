@@ -10,7 +10,6 @@ RUN set -ex && mkdir /app
 WORKDIR /app
 ADD . /app
 
-COPY logzio.conf logzio.conf
 COPY credentials.JSON credentials.JSON
 COPY pyproject.toml pyproject.toml
 COPY poetry.lock poetry.lock
